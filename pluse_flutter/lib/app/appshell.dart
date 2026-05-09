@@ -1,66 +1,120 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/legacy.dart';
-import 'package:pluse_flutter/core/theme/app_theme.dart';
-import 'package:pluse_flutter/screens/callScreen.dart';
-import 'package:pluse_flutter/screens/home.dart';
 import 'package:pluse_flutter/screens/meeting_detail.dart';
 import 'package:pluse_flutter/screens/onboardiing.dart';
-import 'package:pluse_flutter/screens/videoscreen.dart';
+import 'package:pluse_flutter/widget/transition_painter.dart';
 
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final currentView = ref.watch(shellViewProvider);
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
 
-    return  Scaffold(
-          backgroundColor: AppColors.light,
-          body: AnimatedSwitcher(
-            duration: 600.ms,
-            switchInCurve: Curves.easeOutExpo,
-            switchOutCurve: Curves.easeInExpo,
-            transitionBuilder: (child, animation) {
-              return FadeTransition(
-                opacity: animation,
-                child: SlideTransition(
-                  position: Tween<Offset>(
-                    begin: const Offset(0.05, 0),
-                    end: Offset.zero,
-                  ).animate(animation),
-                  child: child,
-                ),
-              );
-            },
-            child: _buildScreen(currentView),
-          ),
-        );
-   
+class _AppShellState extends ConsumerState<AppShell>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _wipeController;
+
+  bool _isWiping = false;
+  bool _hasSwitchedToHome = false;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _wipeController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1350),
+    );
+
+    _wipeController.addListener(() {
+      if (_wipeController.value >= 0.48 && !_hasSwitchedToHome) {
+        _hasSwitchedToHome = true;
+        ref.read(shellViewProvider.notifier).state = ShellView.home;
+      }
+    });
+
+    _wipeController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        setState(() {
+          _isWiping = false;
+        });
+        _wipeController.reset();
+      }
+    });
   }
 
-  Widget _buildScreen(ShellView view) {
-    switch (view) {
-      case ShellView.onboarding:
-        return const OnboardingScreen(key: ValueKey('onboarding'));
-      case ShellView.home:
-        return const HomeScreen(key: ValueKey('home'));
-      case ShellView.calling:
-        return const CallingScreen(key: ValueKey('calling'));
-      case ShellView.video:
-        return const VideocallScreen(key: ValueKey('video'));
-      case ShellView.meetingDetail:
-        return const MeetingDetail(key: ValueKey('meetingDetail'));
-      default:
-        return const OnboardingScreen(key: ValueKey('onboarding'));
-    }
+  void _goToHomeWithSWipe() {
+    if (_isWiping) return;
+
+    setState(() {
+      _isWiping = true;
+      _hasSwitchedToHome = false;
+    });
+
+    _wipeController.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _wipeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final currentView = ref.watch(shellViewProvider);
+
+    return Scaffold(
+      backgroundColor: Colors.white,
+      body: Stack(
+        children: [
+          Positioned.fill(
+            child: AnimatedSwitcher(
+              duration: const Duration(milliseconds: 300),
+              switchInCurve: Curves.easeOut,
+              switchOutCurve: Curves.easeIn,
+              child: currentView == ShellView.onboarding
+                  ? OnboardingScreen(
+                      key: const ValueKey('onboarding'),
+                      onNext: _goToHomeWithSWipe,
+                    )
+                  : const MeetingHomeScreen(
+                      key: ValueKey('home'),
+                    ),
+            ),
+          ),
+
+          if (_isWiping)
+            Positioned.fill(
+              child: IgnorePointer(
+                child: AnimatedBuilder(
+                  animation: _wipeController,
+                  builder: (context, _) {
+                    return CustomPaint(
+                      painter: PremiumSWipePainter(
+                        progress: _wipeController.value,
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
   }
 }
 
 
-enum ShellView { onboarding, home, calling, video, meetingDetail, login, signup }
 
-final shellViewProvider = StateProvider<ShellView>((ref) => ShellView.onboarding);
-final selectedMeetingProvider = StateProvider<String?>((ref) => null);
+enum ShellView {
+  onboarding,
+  home,
+}
+
+final shellViewProvider = StateProvider<ShellView>(
+  (ref) => ShellView.onboarding,
+);

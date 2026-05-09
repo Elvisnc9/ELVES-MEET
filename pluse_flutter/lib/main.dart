@@ -21,7 +21,6 @@ void main() async {
   //   ..connectivityMonitor = FlutterConnectivityMonitor()
   //   ..authSessionManager = FlutterAuthSessionManager();
 
-
   runApp(
     ProviderScope(
       child: TheResponsiveBuilder(
@@ -33,7 +32,6 @@ void main() async {
 
 class MyApp extends ConsumerWidget {
   const MyApp({super.key});
-
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
@@ -42,6 +40,5 @@ class MyApp extends ConsumerWidget {
       theme: AppTheme.Theme,
       home: AppShell(),
     );
-       
   }
 }
