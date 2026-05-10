@@ -37,7 +37,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VIDEO CALL APP',
-      theme: AppTheme.Theme,
+       theme: ThemeData(fontFamily: 'GoogleSans', useMaterial3: true),
       home: AppShell(),
     );
   }

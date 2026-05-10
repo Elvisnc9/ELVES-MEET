@@ -1,431 +1,288 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:pluse_flutter/core/theme/app_theme.dart';
-import 'package:pluse_flutter/widget/transition_painter.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
-import 'package:video_player/video_player.dart';
-
-class OnboardingScreen extends StatefulWidget {
-  final VoidCallback onNext;
-
-  const OnboardingScreen({
-    super.key,
-    required this.onNext,
-  });
-
-  @override
-  State<OnboardingScreen> createState() => _OnboardingScreenState();
 
 
+ 
+const _bg      = Color(0xFFECEDF6);
+const _cardBg  = Color(0xFFF3F4FB);
+const _surface = Colors.white;
+const _primary = Color(0xFF3B4B8C);
+const _dark    = Color(0xFF1A1A2E);
+const _mid     = Color(0xFF4B5160);
+const _light   = Color(0xFF8A8FA8);
+const _divider = Color(0xFFE4E6F0);
+const _dotOn   = Color(0xFF3B4B8C);
+const _dotOff  = Color(0xFFCDD0E0);
+ 
+// ─── Data ────────────────────────────────────────────────────────────────────
+ 
+class _Page {
+  final String title;
+  final String subtitle;
+  final String lottiePath;
+  const _Page(this.title, this.subtitle, this.lottiePath);
 }
-
-class _OnboardingScreenState extends State<OnboardingScreen>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _introController;
-  late final VideoPlayerController _videoController;
-
-  bool _videoReady = false;
-  
-
-    late final PageController _pageController;
-
-  Timer? _autoScrollTimer;
-
-  int currentPage = 0;
-
-
-
-   final List<_OnboardingPageData> pages = const [
-    _OnboardingPageData(
-      title: 'Video meetings with expressions',
-      title2: '& personality',
-      subtext:
-          'Talk in real time and switch into avatar mode for a more personal calling experience.',
-    ),
-    _OnboardingPageData(
-      title: 'More personal video conversations',
-      title2: 'More naturally',
-      subtext:
-          'Enjoy smooth video conversations with expressive avatar features that bring more personality.',
-    ),
-    _OnboardingPageData(
-      title: 'Talk naturally, appear differently',
-      title2: 'With avatars',
-      subtext:
-          'Join seamless conversations and communicate through both real video and avatar presence.',
-    ),
-    _OnboardingPageData(
-      title: 'Built for immersive conversations',
-      title2: 'Presence & style',
-      subtext:
-          'Experience video calling with avatar-based interaction built for comfort and personality.',
-    ),
-  ];
-
+ 
+const _pages = [
+  _Page(
+    'Welcome to Elves Meet',
+    'Make video calls to friends and family or create and join meetings, all in one app',
+    'assets/lottie/welcome.json',
+  ),
+  _Page(
+    'Rich video meetings for everyone to join',
+    'Schedule time to connect when everyone can join, and use virtual backgrounds, chat, captions and live sharing',
+    'assets/lottie/meetings.json',
+  ),
+];
+ 
+// ─── Provider ────────────────────────────────────────────────────────────────
+ 
+final _pageIdxProvider = StateProvider<int>((ref) => 0);
+ 
+// ─── Screen ──────────────────────────────────────────────────────────────────
+ 
+class OnboardingScreen extends ConsumerStatefulWidget {
+  const OnboardingScreen({super.key});
+ 
   @override
-  void initState() {
-    super.initState();
- _pageController = PageController()
-      ..addListener(() {
-        if (!_pageController.hasClients) return;
-        final nextPage = _pageController.page?.round() ?? 0;
-        if (nextPage != currentPage && mounted) {
-          setState(() {
-            currentPage = nextPage;
-          });
-        }
-      });
-    _introController = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 2200),
-    );
-
-    _videoController = VideoPlayerController.asset(
-      'assets/images/BackgroundVideo.mp4',
-    );
-
-    _videoController.initialize().then((_) {
-      if (!mounted) return;
-
-      _videoController
-        ..setLooping(true)
-        ..setVolume(0)
-        ..play();
-
-      setState(() {
-        _videoReady = true;
-      });
-
-      _introController.forward();
-      
-
-      _introController.forward().then((_) {
-  if (!mounted) return;
-  _startAutoScroll();
-});
-    });
-  }
-
-
-  void _startAutoScroll() {
-    _autoScrollTimer?.cancel();
-
-    _autoScrollTimer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      if (!_pageController.hasClients) return;
-
-      final nextPage = (currentPage + 1) % pages.length;
-      _pageController.animateToPage(
-        nextPage,
-        duration: const Duration(milliseconds: 800),
-        curve: Curves.easeInOutCubic,
-      );
-    });
-  }
-
+  ConsumerState<OnboardingScreen> createState() => _State();
+}
+ 
+class _State extends ConsumerState<OnboardingScreen> {
+  final _ctrl = PageController();
+ 
   @override
   void dispose() {
-    _autoScrollTimer?.cancel();
-  _pageController.dispose();  // ADD
-  _introController.dispose();
-  _videoController.dispose();
+    _ctrl.dispose();
     super.dispose();
   }
-
-  double _interval(double start, double end, double value) {
-    final result = ((value - start) / (end - start)).clamp(0.0, 1.0);
-    return Curves.easeOutCubic.transform(result);
-  }
-
+ 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final screenWidth = constraints.maxWidth;
-    
-        final phoneWidth = screenWidth < 430 ? screenWidth * 0.82 : 275.0;
-        final phoneHeight = phoneWidth * 1.82;
-    
-        return AnimatedBuilder(
-          animation: _introController,
-          builder: (context, _) {
-            final value = _introController.value;
-            
-            final sReveal = _interval(0.15, 0.88, value);
-            final titleReveal = _interval(0.25, 0.58, value);
-            final panelReveal = _interval(0.55, 1.00, value);
-            
-            return Stack(
-              children: [
-                Positioned.fill(
-                  child: Container(
-                    color:  Colors.white,
-                  ),
-                ),
-                        
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  top: phoneHeight * 0.20,
-                  height: phoneHeight * 0.62,
-                  child: Stack(
-                    children: [
-                      if (_videoReady)
-                        ClipPath(
-                          clipper: SVideoRevealClipper(
-                            progress: sReveal,
-                          ),
-                          child: SizedBox.expand(
-                            child: FittedBox(
-                              fit: BoxFit.cover,
-                              child: SizedBox(
-                                width:
-                                    _videoController.value.size.width,
-                                height:
-                                    _videoController.value.size.height,
-                                child: VideoPlayer(_videoController),
-                              ),
-                            ),
-                          ),
-                        ),
-                        
-                      // Positioned.fill(
-                      //   child: CustomPaint(
-                      //     painter: SBrandRibbonPainter(
-                      //       progress: sReveal,
-                      //       color: const Color(0xFF171820),
-                      //     ),
-                      //   ),
-                      // ),
-                    ],
-                  ),
-                ),
-                        
-                        
-               
-                        
-                Positioned(
-                  left: 0,
-                  right: 0,
-                  bottom: 0,
-                  height: phoneHeight * 0.56,
-                  child: Transform.translate(
-                    offset: Offset(
-                      0,
-                      phoneHeight * 0.54 * (1 - panelReveal),
-                    ),
-                    child: _BlueIntroPanel(
-                      progress: panelReveal,
-                      onNext: widget.onNext,
-                        currentPage: currentPage,   // ADD
-                        pages: pages,  
-                        pageController: _pageController
-            
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
+    final idx = ref.watch(_pageIdxProvider);
+ 
+    return  Column(
+          children: [
+            // Pager
+            Expanded(
+              child: PageView.builder(
+                controller: _ctrl,
+                itemCount: _pages.length,
+                onPageChanged: (i) =>
+                    ref.read(_pageIdxProvider.notifier).state = i,
+                itemBuilder: (_, i) => _Slide(page: _pages[i]),
+              ),
+            ),
+
+            SizedBox(height: 2.h),
+            // Dots
+            _Dots(current: idx, count: _pages.length),
+ 
+             SizedBox(height: 3.h),
+ 
+            // Bottom card
+            const _BottomCard(),
+          ],
+      
+      
     );
   }
 }
-
-class _BlueIntroPanel extends StatelessWidget {
-  final double progress;
-  final VoidCallback onNext;
-    final int currentPage;               // ADD
-  final List<_OnboardingPageData> pages;
-  final PageController pageController;
-
-  const _BlueIntroPanel({
-    required this.progress,
-    required this.onNext, required this.currentPage, required this.pages, required this.pageController,
-  });
-
+ 
+// ─── Slide ───────────────────────────────────────────────────────────────────
+ 
+class _Slide extends StatelessWidget {
+  final _Page page;
+  const _Slide({required this.page});
+ 
   @override
   Widget build(BuildContext context) {
-    final contentOpacity = Curves.easeOut.transform(progress);
-
-    return Container(
-      decoration: const BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(30),
-        ),
-      ),
-      child: Stack(
-        children: [
-        Positioned(
-  left: 0,
-  right: 0,
-  top: 28,
-  height: 200, // constrain it so it doesn't fight the Stack
-  child: Opacity(
-    opacity: contentOpacity,
-    child: PageView.builder(
-      controller: pageController,
-      itemCount: pages.length,
-      itemBuilder: (context, idx) => PageSlider(
-        title: pages[idx].title,
-        title2: pages[idx].title2,
-        subtext: pages[idx].subtext,
-      ),
-    ),
-  ),
-),
-
-         Positioned(
-        
-          left: 0,
-          right: 0,
-          bottom: 10,
-          child: Button(onTap: onNext).animate().fadeIn(delay: 1.2.seconds, duration: 600.ms)),
-
-        
-        ],
-      ),
-    );
-  }
-}
-
-
-
-
-
-class _OnboardingPageData {
-  final String title;
-  final String title2;
-  final String subtext;
-
-  const _OnboardingPageData({
-    required this.title,
-    required this.title2,
-    required this.subtext,
-  });
-}
-
-class PageSlider extends StatelessWidget {
-  const PageSlider({
-    super.key,
-    required this.title,
-    required this.title2,
-    required this.subtext,
-  });
-
-  final String title;
-  final String title2;
-  final String subtext;
-
-  @override
-  Widget build(BuildContext context) {
-    final textTheme = Theme.of(context).textTheme;
-
     return Padding(
-      padding: EdgeInsets.symmetric(horizontal: 7.w),
+      padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(
-                  text: "$title\n",
-                  style: textTheme.displayLarge?.copyWith(
-                    fontSize: 35.sp,
-                    color: Colors.white,
-                    height: 1.18,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                TextSpan(
-                  text: title2,
-                  style: textTheme.displayLarge?.copyWith(
-                    fontSize: 40.sp,
-                    height: 1.0,
-                    fontWeight: FontWeight.w900,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ],
-            ),
-            textAlign: TextAlign.center,
-          )
-              .animate()
-              .slideX(
-                begin: 0.18,
-                end: 0,
-                duration: 420.ms,
-                curve: Curves.easeOutCubic,
-              )
-              .fadeIn(duration: 280.ms),
-
-          const SizedBox(height: 16),
-
+          const SizedBox(height: 8),
+ 
           Text(
-            subtext,
+            page.title,
             textAlign: TextAlign.center,
-            style: textTheme.labelMedium?.copyWith(
-              fontSize: 12.sp,
-              color: Colors.white70,
-              height: 1.45,
+            style:  GoogleFonts.spaceGrotesk(
+              fontSize: 30.sp,
+              fontWeight: FontWeight.bold,
+              color: _dark,
+              height: 1.25,
+              letterSpacing: -0.4,
             ),
           )
               .animate()
-              .fadeIn(delay: 120.ms, duration: 350.ms)
-              .slideY(begin: 0.15, end: 0),
+              .fadeIn(duration: 400.ms)
+              .slideY(begin: 0.05, end: 0, duration: 400.ms),
+ 
+          const SizedBox(height: 14),
+ 
+          Text(
+            page.subtitle,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 14.5, color: _mid, height: 1.6),
+          )
+              .animate()
+              .fadeIn(delay: 60.ms, duration: 400.ms)
+              .slideY(begin: 0.05, end: 0, delay: 60.ms, duration: 400.ms),
+ 
+        
+ 
+          // ── Lottie slot ──────────────────────────────────────────
+          // Replace the Container below with:
+
+
+         Lottie.asset('assets/images/Video call chatting animation.json',
+         height: 45.h, fit: BoxFit.contain)
+         
+            
+             
+       
         ],
       ),
     );
   }
 }
-
-
-
-
-
-class Button extends StatelessWidget {
-  final VoidCallback onTap;
  
-
-  const Button({
-    super.key,
-    required this.onTap,
+// ─── Dots ────────────────────────────────────────────────────────────────────
+ 
+class _Dots extends StatelessWidget {
+  final int current;
+  final int count;
+  const _Dots({required this.current, required this.count});
+ 
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(count, (i) {
+        final active = i == current;
+        return AnimatedContainer(
+          duration: const Duration(milliseconds: 250),
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          width: active ? 20 : 8,
+          height: 8,
+          decoration: BoxDecoration(
+            color: active ? _dotOn : _dotOff,
+            borderRadius: BorderRadius.circular(4),
+          ),
+        );
+      }),
+    );
+  }
+}
+ 
+// ─── Bottom card ─────────────────────────────────────────────────────────────
+ 
+class _BottomCard extends StatelessWidget {
+  const _BottomCard();
+ 
+  @override
+  Widget build(BuildContext context) {
   
+ 
+    return Container(
+      decoration: const BoxDecoration(
+        color: AppColors.primary,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow:[
+          BoxShadow(color: Color(0x12000000), blurRadius: 20, offset: Offset(0, -4)),
+        ],
+      ),
+      padding: EdgeInsets.all(28),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          // Account row
+          AuthButton(
+            onpress: () {},
+            text: 'Continue With Google',
+            socialogo: 'assets/images/google_logo.png',
+          ),
+          const SizedBox(height: 16),
+ 
+          // CTA button
+          AuthButton(
+            onpress: () {},
+            text: 'Continue as Facebook',
+            socialogo: 'assets/images/facebook_logo.png',
+          ),
+ 
+          const SizedBox(height: 14),
+ 
+          // Guest link
+          GestureDetector(
+            onTap: () {},
+            child: const Text(
+              'Use Meet without an account',
+              style: TextStyle(color: _primary, fontSize: 14.5, fontWeight: FontWeight.w500),
+            ),
+          ),
+ 
+           SizedBox(height: 4.h),
+ 
+          // Legal links
+          Text('By continuing, you agree to our Terms of Service and Privacy Policy.',
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12.5, color: _light))
+              .animate()
+              .fadeIn(delay: 180.ms, duration: 400.ms)
+              .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
+        ],
+      ),
+    )
+        .animate()
+        .fadeIn(delay: 180.ms, duration: 400.ms)
+        .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms);
+  }
+}
+
+class AuthButton extends StatelessWidget {
+  final VoidCallback onpress;
+  final String text;
+  final String socialogo;
+  const AuthButton({
+    super.key,
+    required this.onpress,
+    required this.text,
+    required this.socialogo,
   });
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 60,
-        margin: const EdgeInsets.symmetric(horizontal: 28),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(30),
-          color: Colors.white,
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 20,
-              offset: const Offset(0, 8),
-            ),
-          ],
+    return SizedBox(
+      width: double.infinity,
+      height: 60,
+      child: ElevatedButton(
+        onPressed: onpress,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _primary,
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(32)),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-      
-            SizedBox(width: 3.w),
-            const Text(
-              "Get Started Now",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+
+            Image.asset(
+              socialogo,
+              height: 24,
+            ),
+             const SizedBox(width: 12),
+            Text(
+              text,
+              style: TextStyle(fontSize: 15.5, fontWeight: FontWeight.w600),
             ),
           ],
         ),

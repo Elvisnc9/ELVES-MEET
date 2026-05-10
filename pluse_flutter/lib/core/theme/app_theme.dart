@@ -13,12 +13,12 @@ class AppTheme {
      ),
     hintColor: Colors.black,
     dividerColor: Colors.black,
-    cardColor: AppColors.wine.withOpacity(0.9),
+    cardColor: Colors.black.withOpacity(0.9),
     canvasColor: Colors.grey.withOpacity(0.1),
     shadowColor: Colors.black,
      splashColor: Colors.black,
      focusColor: Colors.grey,
-      secondaryHeaderColor: AppColors.wine,
+      secondaryHeaderColor: Colors.black,
       buttonTheme: ButtonThemeData(),
       iconButtonTheme: IconButtonThemeData(
       style: ButtonStyle(
@@ -38,18 +38,18 @@ class AppTheme {
       fontSize: 16.sp,
       fontWeight: FontWeight.w600,
       height: 1.4,
-     color: AppColors.wine
+     color: Colors.black
     ),
     displaySmall: GoogleFonts.spaceGrotesk(
       fontSize: 17.sp,
       fontWeight: FontWeight.bold,
-     color: AppColors.wine
+     color: Colors.black
     ),
 
     labelMedium: GoogleFonts.spaceGrotesk(
       fontSize: 14.sp,
       fontWeight: FontWeight.bold,
-     color: AppColors.wine.withOpacity(0.8)
+     color: Colors.black.withOpacity(0.8)
     
     ),
 
@@ -58,22 +58,17 @@ class AppTheme {
     labelSmall: GoogleFonts.spaceGrotesk(
       fontSize: 14.sp,
       fontWeight: FontWeight.bold,
-     color: AppColors.wine
+     color: Colors.black
     
     ),
       labelLarge: GoogleFonts.spaceGrotesk(
       fontSize: 17.sp,
       fontWeight: FontWeight.w500,
-     color: AppColors.wine.withOpacity(0.95)
+     color: Colors.black.withOpacity(0.95)
     
     ),
 
-    bodySmall: GoogleFonts.spaceGrotesk(
-      fontSize: 15.sp,
-      fontWeight: FontWeight.w500,
-     color: AppColors.light.withOpacity(0.95)
-    
-    ),
+ 
 
   ),
 
@@ -86,10 +81,10 @@ class AppTheme {
 
 
 class AppColors {
-  static const Color primary = Color(0xFF9D1F15);
-  static const Color light = Color.fromARGB(255, 249, 250, 217);
-  static const Color wine = Color(0xFF722f37);
-  static const Color accent = Color(0xFFA0430A);
+  static const Color primary = Color(0xFFFEFACD);
+  static const Color secondary = Color(0xFF5F4A8B);
+
+
 }
 
 

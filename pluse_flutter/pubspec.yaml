@@ -38,7 +38,6 @@ dependencies:
   the_responsive_builder:
   google_fonts:
   lottie:
-  video_player:
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
