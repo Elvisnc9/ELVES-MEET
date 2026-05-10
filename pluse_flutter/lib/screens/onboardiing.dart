@@ -33,12 +33,13 @@ const _pages = [
   _Page(
     'Welcome to Elves Meet',
     'Make video calls to friends and family or create and join meetings, all in one app',
-    'assets/lottie/welcome.json',
+    'assets/images/Video call chatting animation.json',
+  
   ),
   _Page(
     'Rich video meetings for everyone to join',
     'Schedule time to connect when everyone can join, and use virtual backgrounds, chat, captions and live sharing',
-    'assets/lottie/meetings.json',
+      'assets/images/Video call chatting animation.json',
   ),
 ];
  
@@ -142,8 +143,13 @@ class _Slide extends StatelessWidget {
           // Replace the Container below with:
 
 
-         Lottie.asset('assets/images/Video call chatting animation.json',
-         height: 45.h, fit: BoxFit.contain)
+         Expanded(
+           child: Transform.scale(
+            scale: 1.45,
+             child: Lottie.asset(page.lottiePath,
+             height: 65.h, fit: BoxFit.contain),
+           ),
+         )
          
             
              
