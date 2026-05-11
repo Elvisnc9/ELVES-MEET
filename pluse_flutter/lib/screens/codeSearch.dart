@@ -68,7 +68,7 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                 child: Text(
                   'Join with a code',
                   style: GoogleFonts.spaceGrotesk(
-                    fontSize: 28,
+                    fontSize: 24.sp,
                     fontWeight: FontWeight.w500,
                     color: const Color(0xff202124),
                     letterSpacing: -1.5,
@@ -102,33 +102,38 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
           ),
 
           SizedBox(height: 4.h),
-          Text(
-            'Enter the code provided by the meeting organiser',
-            style: TextStyle(
-              fontSize: 15.5.sp,
-
-              color: const Color(0xff202124),
-            ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Text(
+              'Enter the code provided by the meeting organiser',
+              textAlign: TextAlign.start,
+              style: TextStyle(
+                fontSize: 14.sp,
+            fontWeight: FontWeight.w500,
+                color: Colors.black12.withOpacity(0.3),
+              ),
+            )
           ),
 
           SizedBox(height: 2.5.h),
-
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 26),
             child: Container(
-              height: 56,
+              height: 50,
               decoration: BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.circular(38),
               ),
               child: TextField(
                 controller: codeCtrl,
+                onChanged: (_) => setState(() {}),
                 focusNode: _focusNode,
             autocorrect: false,
   enableSuggestions: false,
     keyboardType: TextInputType.visiblePassword,
   textCapitalization: TextCapitalization.none,
                 cursorColor: Colors.black,
+                cursorHeight: 20,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 19,
                   color: const Color(0xff202124),
@@ -137,7 +142,7 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                 
                   hintText: 'Example: abc-mnop-xyz',
                   hintStyle: GoogleFonts.spaceGrotesk(
-                    fontSize: 19,
+                    fontSize: 16,
                     color: const Color(0xffB7B8C2),
                   ),
                   border: InputBorder.none,

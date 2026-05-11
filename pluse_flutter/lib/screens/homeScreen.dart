@@ -4,7 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pluse_flutter/app/appshell.dart';
+import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
+import 'package:pluse_flutter/core/theme/app_theme.dart';
+import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/widget/loader.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
@@ -20,13 +24,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _codeCtrl = TextEditingController();
   bool _isDrawerOpen = false;
 
-  void _openDrawer() {
-    setState(() => _isDrawerOpen = true);
-  }
-
-  void _closeDrawer() {
-    setState(() => _isDrawerOpen = false);
-  }
+  void _openDrawer()  => setState(() => _isDrawerOpen = true);
+  void _closeDrawer() => setState(() => _isDrawerOpen = false);
 
   @override
   void dispose() {
@@ -36,35 +35,48 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.watch(authProvider);
+
+    // ── Authenticating → full-screen loader ─────────────────────
+    if (auth.isAuthenticating) return const LoadingScreen();
+
     return Stack(
       children: [
-        // Main content
         Column(
           children: [
             SizedBox(height: 1.5.h),
             _TopBar(
               ctrl: _codeCtrl,
               onMenuTap: _openDrawer,
-              CodesearchTap: () {
+              onCodeTap: () {
+                FocusScope.of(context).unfocus();
                 ref.read(shellViewProvider.notifier).state = ShellView.codesearch;
               },
-              profileTap: () {
-                ref.read(shellViewProvider.notifier).state = ShellView.profile;
-              },
+              onProfileTap: () =>
+                  ref.read(shellViewProvider.notifier).state = ShellView.profile,
             ),
             SizedBox(height: 3.h),
-            const Expanded(child: _Body()),
+    
+            // ── Body switches on auth state ──────────────────
+            Expanded(
+              child: auth.isAuthenticated
+                  ? const _AuthenticatedBody()
+                  : const _UnauthenticatedBody(),
+            ),
           ],
         ),
-
-        // FABs pinned bottom-right
-         Positioned(
+    
+        // FABs — only shown when not loading
+        Positioned(
           bottom: 24,
           right: 20,
-          child: _FabStack( joinTap: () => ref.watch(shellViewProvider.notifier).state = ShellView.codesearch),
+          child: _FabStack(
+            joinTap: () =>
+                ref.read(shellViewProvider.notifier).state = ShellView.codesearch,
+          ),
         ),
-
-        // Dark overlay
+    
+        // Overlay
         if (_isDrawerOpen)
           Positioned.fill(
             child: GestureDetector(
@@ -72,14 +84,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: AnimatedOpacity(
                 opacity: _isDrawerOpen ? 1 : 0,
                 duration: 250.ms,
-                child: Container(
-                  color: Colors.black.withOpacity(0.55),
-                ),
+                child: ColoredBox(color: Colors.black.withOpacity(0.55)),
               ),
             ),
           ),
-
-        // Custom drawer
+    
+        // Drawer
         AnimatedPositioned(
           duration: 320.ms,
           curve: Curves.easeOutCubic,
@@ -89,8 +99,105 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           width: 82.w,
           child: _MeetDrawer(
             onClose: _closeDrawer,
+            onSettingsTap: () {
+              _closeDrawer();
+              ref.read(shellViewProvider.notifier).state = ShellView.profile;
+            },
           ),
         ),
+      ],
+    );
+  }
+}
+
+// ─── Authenticated body — 3 dummy call history containers ────────────────────
+
+class _AuthenticatedBody extends StatelessWidget {
+  const _AuthenticatedBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Recent calls',
+            style: GoogleFonts.spaceGrotesk(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.w600,
+              color: MeetColors.dark,
+            ),
+          ),
+          SizedBox(height: 1.5.h),
+          // Dummy containers — swap with real call history widgets later
+          ...List.generate(
+            3,
+            (i) => Container(
+              margin: EdgeInsets.only(bottom: 1.5.h),
+              height: 72,
+              decoration: BoxDecoration(
+                color: MeetColors.surface,
+                borderRadius: BorderRadius.circular(18),
+              ),
+            )
+                .animate()
+                .fadeIn(delay: (i * 60).ms, duration: 350.ms)
+                .slideY(begin: 0.04, end: 0, delay: (i * 60).ms, duration: 350.ms),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ─── Unauthenticated body — lottie + text ────────────────────────────────────
+
+class _UnauthenticatedBody extends StatelessWidget {
+  const _UnauthenticatedBody();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Lottie.asset(
+          'assets/images/Video call chatting animation.json',
+          fit: BoxFit.contain,
+        ),
+
+        SizedBox(height: 5.5.h),
+
+        Text(
+          'Select an account to do \nmore in Meet',
+          textAlign: TextAlign.center,
+          style: GoogleFonts.spaceGrotesk(
+            fontSize: 24.sp,
+            fontWeight: FontWeight.w400,
+            color: MeetColors.dark,
+            height: 1.3,
+            letterSpacing: -0.3,
+          ),
+        )
+            .animate()
+            .fadeIn(delay: 160.ms, duration: 400.ms)
+            .slideY(begin: 0.05, end: 0, delay: 160.ms, duration: 400.ms),
+
+        SizedBox(height: 1.5.h),
+
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 48),
+          child: Text(
+            'Add your account so you can start your own calls and use your contacts in Meet. Without an account, you can only join meetings created by others.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.5.sp, color: MeetColors.mid, height: 1.65),
+          )
+              .animate()
+              .fadeIn(delay: 220.ms, duration: 400.ms)
+              .slideY(begin: 0.05, end: 0, delay: 220.ms, duration: 400.ms),
+        ),
+
+        SizedBox(height: 14.h),
       ],
     );
   }
@@ -101,12 +208,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _TopBar extends StatelessWidget {
   final TextEditingController ctrl;
   final VoidCallback onMenuTap;
-  final VoidCallback CodesearchTap;
-  final VoidCallback profileTap;
+  final VoidCallback onCodeTap;
+  final VoidCallback onProfileTap;
 
   const _TopBar({
     required this.ctrl,
-    required this.onMenuTap, required this.CodesearchTap, required this.profileTap,
+    required this.onMenuTap,
+    required this.onCodeTap,
+    required this.onProfileTap,
   });
 
   @override
@@ -117,36 +226,35 @@ class _TopBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onMenuTap,
-            icon: const Icon(
-              Icons.menu_rounded,
-              color: MeetColors.dark,
-              size: 26,
-            ),
+            icon: const Icon(Icons.menu_rounded, color: MeetColors.dark, size: 26),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
-
           const SizedBox(width: 6),
-
           Expanded(
             child: InkWell(
-              onTap: CodesearchTap,
+              onTap: onCodeTap,
               borderRadius: BorderRadius.circular(32),
               child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
                 height: 48,
                 decoration: BoxDecoration(
                   color: MeetColors.surface,
                   borderRadius: BorderRadius.circular(32),
                 ),
-                child: Center(child: Text('Enter a code', style: TextStyle(color: MeetColors.mid, fontSize: 14.sp))),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Enter a code',
+                    style: TextStyle(color: MeetColors.mid, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                  ),
+                ),
               ),
             ),
           ),
-
           const SizedBox(width: 10),
-
           GestureDetector(
-            onTap: profileTap,
+            onTap: onProfileTap,
             child: Container(
               width: 40,
               height: 40,
@@ -164,63 +272,6 @@ class _TopBar extends StatelessWidget {
         ],
       ),
     ).animate().fadeIn(duration: 350.ms);
-  }
-}
-// ─── Body ────────────────────────────────────────────────────────────────────
-
-class _Body extends StatelessWidget {
-  const _Body();
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        // Lottie
-        Lottie.asset(
-          'assets/images/Video call chatting animation.json',
-          fit: BoxFit.contain,
-        ),
-           
-    SizedBox(height: 5.5.h),
-        // Title
-        Text(
-          'Select an account to do \nmore in Meet',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.w400,
-            color: MeetColors.dark,
-            height: 1.3,
-            letterSpacing: -0.3,
-          ),
-        )
-            .animate()
-            .fadeIn(delay: 160.ms, duration: 400.ms)
-            .slideY(begin: 0.05, end: 0, delay: 160.ms, duration: 400.ms),
-    
-        SizedBox(height: 1.5.h),
-    
-        // Subtitle
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48.0),
-          child: Text(
-            'Add your account so you can start your own calls and use your contacts in Meet. Without an account, you can only join meetings created by others.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 12.5.sp,
-              color: MeetColors.mid,
-              height: 1.65,
-            ),
-          )
-              .animate()
-              .fadeIn(delay: 220.ms, duration: 400.ms)
-              .slideY(begin: 0.05, end: 0, delay: 220.ms, duration: 400.ms),
-        ),
-    
-        // Space so FABs don't cover text
-        SizedBox(height: 14.h),
-      ],
-    );
   }
 }
 
@@ -242,9 +293,7 @@ class _FabStack extends StatelessWidget {
           iconColor: MeetColors.primary,
           onTap: () {},
         ),
-
         const SizedBox(height: 12),
-
         _WideFab(
           color: MeetColors.fabJoin,
           label: 'Join',
@@ -347,25 +396,24 @@ class _WideFab extends StatelessWidget {
   }
 }
 
+// ─── Drawer ───────────────────────────────────────────────────────────────────
+
 class _MeetDrawer extends StatelessWidget {
   final VoidCallback onClose;
+  final VoidCallback onSettingsTap;
 
-  const _MeetDrawer({
-    required this.onClose,
-  });
+  const _MeetDrawer({required this.onClose, required this.onSettingsTap});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: const Color(0xffFAFAEF),
+      color: AppColors.primary,
       child: SafeArea(
         bottom: false,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 2.5.h),
-
-
             Center(
               child: Text(
                 'ELVES MEET',
@@ -376,36 +424,12 @@ class _MeetDrawer extends StatelessWidget {
                 ),
               ).animate().fadeIn(duration: 350.ms),
             ),
-
             SizedBox(height: 1.4.h),
-
-            Divider(
-              height: 1,
-              thickness: 0.6,
-              color: MeetColors.mid.withOpacity(0.18),
-            ),
-
+            Divider(height: 1, thickness: 0.6, color: MeetColors.mid.withOpacity(0.18)),
             SizedBox(height: 1.4.h),
-
-            _DrawerItem(
-              icon: Icons.privacy_tip_outlined,
-              title: 'Privacy in Meet',
-              onTap: () {},
-            ),
-
-            _DrawerItem(
-              icon: Icons.settings_outlined,
-              title: 'Settings',
-              onTap: () {},
-            ),
-
-            _DrawerItem(
-              icon: Icons.help_outline_rounded,
-              title: 'Help & feedback',
-              onTap: () {},
-            ),
-
-           
+            _DrawerItem(icon: Icons.privacy_tip_outlined, title: 'Privacy in Meet', onTap: () {}),
+            _DrawerItem(icon: Icons.settings_outlined, title: 'Settings', onTap: onSettingsTap),
+            _DrawerItem(icon: Icons.help_outline_rounded, title: 'Help & feedback', onTap: () {}),
           ],
         ),
       ),
@@ -418,11 +442,7 @@ class _DrawerItem extends StatelessWidget {
   final String title;
   final VoidCallback onTap;
 
-  const _DrawerItem({
-    required this.icon,
-    required this.title,
-    required this.onTap,
-  });
+  const _DrawerItem({required this.icon, required this.title, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -432,14 +452,8 @@ class _DrawerItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
         child: Row(
           children: [
-            Icon(
-              icon,
-              size: 21,
-              color: MeetColors.dark.withOpacity(0.9),
-            ),
-
+            Icon(icon, size: 21, color: MeetColors.dark.withOpacity(0.9)),
             const SizedBox(width: 18),
-
             Text(
               title,
               style: GoogleFonts.spaceGrotesk(

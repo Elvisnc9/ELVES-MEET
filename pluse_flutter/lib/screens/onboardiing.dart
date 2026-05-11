@@ -6,8 +6,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pluse_flutter/app/appshell.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
-import 'package:pluse_flutter/core/theme/app_theme.dart';
-
+import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/screens/profile.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -26,8 +26,8 @@ const _pages = [
     'assets/images/Video call chatting animation.json',
   ),
   _Page(
-    'Rich video meetings for everyone to join',
-    'Schedule time to connect when everyone can join, and use virtual backgrounds, chat, captions and live sharing',
+    'Video meeting for everyone',
+    'Schedule a time that works for everyone, with virtual backgrounds and live sharing',
     'assets/images/Video call chatting animation.json',
   ),
 ];
@@ -60,7 +60,6 @@ class _State extends ConsumerState<OnboardingScreen> {
 
     return Column(
       children: [
-        // Pager
         Expanded(
           child: PageView.builder(
             controller: _ctrl,
@@ -72,15 +71,22 @@ class _State extends ConsumerState<OnboardingScreen> {
         ),
 
         SizedBox(height: 2.h),
-
-        // Dots
         _Dots(current: idx, count: _pages.length),
-
         SizedBox(height: 3.h),
 
-        // Bottom card
-         _BottomCard(
-          authenticate: () => ref.watch(shellViewProvider.notifier).state = ShellView.home,
+        _BottomCard(
+          // Google / Facebook → sign in then go home (authenticated)
+          onSignIn: () async {
+            await ref.read(authProvider.notifier).signIn();
+            if (mounted) {
+              ref.read(shellViewProvider.notifier).state = ShellView.home;
+            }
+          },
+          // Guest → unauthenticated home
+          onGuest: () {
+            ref.read(authProvider.notifier).continueAsGuest();
+            ref.read(shellViewProvider.notifier).state = ShellView.home;
+          },
         ),
       ],
     );
@@ -99,7 +105,7 @@ class _Slide extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          const SizedBox(height: 8),
+        SizedBox(height: 3.h),
 
           Text(
             page.title,
@@ -121,24 +127,16 @@ class _Slide extends StatelessWidget {
           Text(
             page.subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14.5,
-              color: MeetColors.mid,
-              height: 1.6,
-            ),
+            style: TextStyle(fontSize: 14.5.sp, color: MeetColors.mid, height: 1.6),
           )
               .animate()
               .fadeIn(delay: 60.ms, duration: 400.ms)
               .slideY(begin: 0.05, end: 0, delay: 60.ms, duration: 400.ms),
 
-          // Lottie
           Expanded(
             child: Transform.scale(
               scale: 1.5,
-              child: Lottie.asset(
-                page.lottiePath,
-                fit: BoxFit.contain,
-              ),
+              child: Lottie.asset(page.lottiePath, fit: BoxFit.contain),
             ),
           ),
         ],
@@ -178,60 +176,60 @@ class _Dots extends StatelessWidget {
 // ─── Bottom card ─────────────────────────────────────────────────────────────
 
 class _BottomCard extends StatelessWidget {
-  final VoidCallback authenticate;
-  const _BottomCard({required this.authenticate});
+  final VoidCallback onSignIn;
+  final VoidCallback onGuest;
+
+  const _BottomCard({required this.onSignIn, required this.onGuest});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      decoration: BoxDecoration(
+      decoration: const BoxDecoration(
         color: MeetColors.surface,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 20,
-            offset: Offset(0, -4),
-          ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        boxShadow: [
+          BoxShadow(color: Color(0x12000000), blurRadius: 20, offset: Offset(0, -4)),
         ],
       ),
-      padding: const EdgeInsets.all(28),
+      padding: const EdgeInsets.all(10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          AuthButton(
-            onpress: 
-             authenticate,
-          
-            text: 'Continue With Google',
-            socialogo: 'assets/images/google_logo.png',
-          ),
 
-          const SizedBox(height: 16),
+ AuthButton(
+              text: 'Continue with Facebook',
+              imageIcon: 'assets/images/facebook_logo.png',
+              color: const Color(0xff4867AA),
+              textColor: Colors.white,
+              iconColor: Colors.white,
+              onTap: onSignIn
+            ),
 
-          AuthButton(
-            onpress: () {},
-            text: 'Continue with Facebook',
-            socialogo: 'assets/images/facebook_logo.png',
-          ),
+            SizedBox(height: 1.5.h),
 
+            AuthButton(
+              text: 'Continue with Gmail',
+              imageIcon: 'assets/images/google_logo.png',
+              color: Colors.white,
+              textColor: const Color(0xff444444),
+              iconColor: const Color(0xff444444),
+              onTap: onSignIn
+            ),
+         
           const SizedBox(height: 14),
-
           GestureDetector(
-            onTap: () {},
-            child: Text(
+            onTap: onGuest,
+            child: const Text(
               'Use Meet without an account',
               style: TextStyle(
-                color: MeetColors.dark,
+                color: MeetColors.primary,
                 fontSize: 14.5,
                 fontWeight: FontWeight.w500,
               ),
             ),
           ),
-
           SizedBox(height: 4.h),
-
-          Text(
+          const Text(
             'By continuing, you agree to our Terms of Service and Privacy Policy.',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 12.5, color: MeetColors.light),
@@ -250,48 +248,3 @@ class _BottomCard extends StatelessWidget {
 
 // ─── Auth button ─────────────────────────────────────────────────────────────
 
-class AuthButton extends StatelessWidget {
-  final VoidCallback onpress;
-  final String text;
-  final String socialogo;
-
-  const AuthButton({
-    super.key,
-    required this.onpress,
-    required this.text,
-    required this.socialogo,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return SizedBox(
-      width: double.infinity,
-      height: 60,
-      child: ElevatedButton(
-        onPressed: onpress,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: MeetColors.primary,
-          foregroundColor: MeetColors.surface,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(32),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Image.asset(socialogo, height: 24),
-            const SizedBox(width: 12),
-            Text(
-              text,
-              style: const TextStyle(
-                fontSize: 15.5,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}

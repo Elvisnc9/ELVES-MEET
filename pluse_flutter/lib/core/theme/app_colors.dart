@@ -11,7 +11,7 @@ abstract final class MeetColors {
  
   // Text
   static const dark     = Color(0xFF1A1A2E);
-  static const mid      = Color(0xFF4B5160);
+  static const mid      = Color.fromARGB(255, 85, 86, 86);
   static const light    = Color(0xFF8A8FA8);
  
   // UI
