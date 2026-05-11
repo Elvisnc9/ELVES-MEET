@@ -45,8 +45,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             _TopBar(
               ctrl: _codeCtrl,
               onMenuTap: _openDrawer,
-              onCodeTap: () {
+              CodesearchTap: () {
                 ref.read(shellViewProvider.notifier).state = ShellView.codesearch;
+              },
+              profileTap: () {
+                ref.read(shellViewProvider.notifier).state = ShellView.profile;
               },
             ),
             SizedBox(height: 3.h),
@@ -98,11 +101,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 class _TopBar extends StatelessWidget {
   final TextEditingController ctrl;
   final VoidCallback onMenuTap;
-  final VoidCallback onCodeTap;
+  final VoidCallback CodesearchTap;
+  final VoidCallback profileTap;
 
   const _TopBar({
     required this.ctrl,
-    required this.onMenuTap, required this.onCodeTap,
+    required this.onMenuTap, required this.CodesearchTap, required this.profileTap,
   });
 
   @override
@@ -126,7 +130,7 @@ class _TopBar extends StatelessWidget {
 
           Expanded(
             child: InkWell(
-              onTap: onCodeTap,
+              onTap: CodesearchTap,
               borderRadius: BorderRadius.circular(32),
               child: Container(
                 height: 48,
@@ -141,17 +145,20 @@ class _TopBar extends StatelessWidget {
 
           const SizedBox(width: 10),
 
-          Container(
-            width: 40,
-            height: 40,
-            decoration: const BoxDecoration(
-              shape: BoxShape.circle,
-              color: MeetColors.bg,
-            ),
-            child: const Icon(
-              Icons.person_outline_rounded,
-              color: MeetColors.primary,
-              size: 22,
+          GestureDetector(
+            onTap: profileTap,
+            child: Container(
+              width: 40,
+              height: 40,
+              decoration: const BoxDecoration(
+                shape: BoxShape.circle,
+                color: MeetColors.bg,
+              ),
+              child: const Icon(
+                Icons.person_outline_rounded,
+                color: MeetColors.primary,
+                size: 22,
+              ),
             ),
           ),
         ],
@@ -350,7 +357,7 @@ class _MeetDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: MeetColors.surface,
+      color: const Color(0xffFAFAEF),
       child: SafeArea(
         bottom: false,
         child: Column(

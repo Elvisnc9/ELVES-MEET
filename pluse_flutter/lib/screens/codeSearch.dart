@@ -102,7 +102,6 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
           ),
 
           SizedBox(height: 4.h),
-
           Text(
             'Enter the code provided by the meeting organiser',
             style: TextStyle(
