@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:pluse_flutter/core/theme/app_theme.dart';
+import 'package:pluse_flutter/screens/codeSearch.dart';
 import 'package:pluse_flutter/screens/homeScreen.dart';
 import 'package:pluse_flutter/screens/onboardiing.dart';
 
@@ -22,7 +24,7 @@ class _AppShellState extends ConsumerState<AppShell>
     final currentView = ref.watch(shellViewProvider);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primary,
       body: SafeArea(
         child: Stack(
           children: [
@@ -31,14 +33,19 @@ class _AppShellState extends ConsumerState<AppShell>
                 duration: const Duration(milliseconds: 300),
                 switchInCurve: Curves.easeOut,
                 switchOutCurve: Curves.easeIn,
-                child: currentView == ShellView.onboarding
-                    ? OnboardingScreen(
-                        key: const ValueKey('onboarding'),
-                      
-                      )
-                    : const HomeScreen(
-                        key: ValueKey('home'),
-                      ),
+child: currentView == ShellView.onboarding
+    ? OnboardingScreen(
+        key: const ValueKey('onboarding'),
+      )
+    : currentView == ShellView.home
+        ? const HomeScreen(
+            key: ValueKey('home'),
+          )
+        : CodeSearchScreen(
+            onBack: () {
+              ref.read(shellViewProvider.notifier).state = ShellView.home;
+            },
+          )
               ),
             ),
         
@@ -55,6 +62,7 @@ class _AppShellState extends ConsumerState<AppShell>
 enum ShellView {
   onboarding,
   home,
+  codesearch
 }
 
 final shellViewProvider = StateProvider<ShellView>(
