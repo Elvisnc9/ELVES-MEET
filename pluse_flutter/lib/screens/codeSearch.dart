@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pluse_flutter/app/appshell.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 class CodeSearchScreen extends ConsumerStatefulWidget {
-  final VoidCallback onBack;
-
   const CodeSearchScreen({
     super.key,
-    required this.onBack,
   });
 
   @override
@@ -17,10 +15,20 @@ class CodeSearchScreen extends ConsumerStatefulWidget {
 
 class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
   final TextEditingController codeCtrl = TextEditingController();
+  final FocusNode _focusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) _focusNode.requestFocus();
+    });
+  }
 
   @override
   void dispose() {
     codeCtrl.dispose();
+    _focusNode.dispose();
     super.dispose();
   }
 
@@ -34,20 +42,28 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(height: 1.2.h),
-          
+
           Row(
             children: [
               GestureDetector(
-                onTap: widget.onBack,
+                onTap: () async {
+                  FocusManager.instance.primaryFocus?.unfocus();
+
+                  await Future.delayed(const Duration(milliseconds: 120));
+
+                  if (!mounted) return;
+
+                  ref.read(shellViewProvider.notifier).state = ShellView.home;
+                },
                 child: const Icon(
                   Icons.arrow_back_rounded,
                   size: 28,
                   color: Color(0xff202124),
                 ),
               ),
-                  
+
               const SizedBox(width: 18),
-                  
+
               Expanded(
                 child: Text(
                   'Join with a code',
@@ -59,7 +75,7 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                   ),
                 ),
               ),
-                  
+
               GestureDetector(
                 onTap: canJoin ? () {} : null,
                 child: Container(
@@ -77,29 +93,27 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                     style: GoogleFonts.spaceGrotesk(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,
-                      color: canJoin
-                          ? Colors.white
-                          : const Color(0xff8C8E99),
+                      color: canJoin ? Colors.white : const Color(0xff8C8E99),
                     ),
                   ),
                 ),
               ),
             ],
           ),
-          
+
           SizedBox(height: 4.h),
-          
+
           Text(
             'Enter the code provided by the meeting organiser',
             style: TextStyle(
               fontSize: 15.5.sp,
-              
+
               color: const Color(0xff202124),
             ),
           ),
-          
+
           SizedBox(height: 2.5.h),
-          
+
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 26),
             child: Container(
@@ -110,13 +124,18 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
               ),
               child: TextField(
                 controller: codeCtrl,
-                onChanged: (_) => setState(() {}),
-                cursorColor: const Color(0xff1A73E8),
+                focusNode: _focusNode,
+            autocorrect: false,
+  enableSuggestions: false,
+    keyboardType: TextInputType.visiblePassword,
+  textCapitalization: TextCapitalization.none,
+                cursorColor: Colors.black,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 19,
                   color: const Color(0xff202124),
                 ),
                 decoration: InputDecoration(
+                
                   hintText: 'Example: abc-mnop-xyz',
                   hintStyle: GoogleFonts.spaceGrotesk(
                     fontSize: 19,

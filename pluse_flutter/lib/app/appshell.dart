@@ -30,7 +30,7 @@ class _AppShellState extends ConsumerState<AppShell>
           children: [
             Positioned.fill(
               child: AnimatedSwitcher(
-                duration: const Duration(milliseconds: 300),
+                duration: const Duration(milliseconds: 150),
                 switchInCurve: Curves.easeOut,
                 switchOutCurve: Curves.easeIn,
 child: currentView == ShellView.onboarding
@@ -42,9 +42,7 @@ child: currentView == ShellView.onboarding
             key: ValueKey('home'),
           )
         : CodeSearchScreen(
-            onBack: () {
-              ref.read(shellViewProvider.notifier).state = ShellView.home;
-            },
+           
           )
               ),
             ),
