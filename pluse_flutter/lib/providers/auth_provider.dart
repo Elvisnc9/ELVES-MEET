@@ -7,14 +7,13 @@ final authProvider =
 class AuthNotifier extends StateNotifier<AuthStatus> {
   AuthNotifier() : super(AuthStatus.unauthenticated);
 
-  /// Google / Facebook sign-in — simulates a network call
+  /// Simulates a 4-second network call — swap body with real auth later
   Future<void> signIn() async {
     state = AuthStatus.authenticating;
-    await Future.delayed(const Duration(seconds: 2)); // swap with real auth
+    await Future.delayed(const Duration(seconds: 2));
     state = AuthStatus.authenticated;
   }
 
-  /// "Use without account" — stays unauthenticated, just proceeds
   void continueAsGuest() => state = AuthStatus.unauthenticated;
 
   void signOut() => state = AuthStatus.unauthenticated;

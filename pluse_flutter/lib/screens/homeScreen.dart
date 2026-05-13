@@ -49,7 +49,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ctrl: _codeCtrl,
               onMenuTap: _openDrawer,
               onCodeTap: () {
-                FocusScope.of(context).unfocus();
                 ref.read(shellViewProvider.notifier).state = ShellView.codesearch;
               },
               onProfileTap: () =>
@@ -102,6 +101,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             onSettingsTap: () {
               _closeDrawer();
               ref.read(shellViewProvider.notifier).state = ShellView.profile;
+            },
+            onTap: () {
+              _closeDrawer();
+              ref.read(shellViewProvider.notifier).state = ShellView.onboarding;
             },
           ),
         ),
@@ -401,8 +404,9 @@ class _WideFab extends StatelessWidget {
 class _MeetDrawer extends StatelessWidget {
   final VoidCallback onClose;
   final VoidCallback onSettingsTap;
+  final VoidCallback onTap;
 
-  const _MeetDrawer({required this.onClose, required this.onSettingsTap});
+  const _MeetDrawer({required this.onClose, required this.onSettingsTap, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -427,7 +431,7 @@ class _MeetDrawer extends StatelessWidget {
             SizedBox(height: 1.4.h),
             Divider(height: 1, thickness: 0.6, color: MeetColors.mid.withOpacity(0.18)),
             SizedBox(height: 1.4.h),
-            _DrawerItem(icon: Icons.privacy_tip_outlined, title: 'Privacy in Meet', onTap: () {}),
+            _DrawerItem(icon: Icons.privacy_tip_outlined, title: 'Privacy in Meet', onTap: onTap),
             _DrawerItem(icon: Icons.settings_outlined, title: 'Settings', onTap: onSettingsTap),
             _DrawerItem(icon: Icons.help_outline_rounded, title: 'Help & feedback', onTap: () {}),
           ],

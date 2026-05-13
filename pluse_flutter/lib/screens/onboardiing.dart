@@ -54,6 +54,16 @@ class _State extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
+Future<void> _handleSignIn() async {
+  // Capture both notifiers BEFORE any await
+  final shell = ref.read(shellViewProvider.notifier);
+  final auth  = ref.read(authProvider.notifier);
+
+  shell.state = ShellView.loading;
+  await auth.signIn();
+  shell.state = ShellView.home;  // safe — no ref call after await
+}
+
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
@@ -75,14 +85,7 @@ class _State extends ConsumerState<OnboardingScreen> {
         SizedBox(height: 3.h),
 
         _BottomCard(
-          // Google / Facebook → sign in then go home (authenticated)
-          onSignIn: () async {
-            await ref.read(authProvider.notifier).signIn();
-            if (mounted) {
-              ref.read(shellViewProvider.notifier).state = ShellView.home;
-            }
-          },
-          // Guest → unauthenticated home
+          onSignIn: _handleSignIn,
           onGuest: () {
             ref.read(authProvider.notifier).continueAsGuest();
             ref.read(shellViewProvider.notifier).state = ShellView.home;
@@ -105,7 +108,7 @@ class _Slide extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-        SizedBox(height: 3.h),
+          SizedBox(height: 3.h),
 
           Text(
             page.title,
@@ -127,7 +130,11 @@ class _Slide extends StatelessWidget {
           Text(
             page.subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 14.5.sp, color: MeetColors.mid, height: 1.6),
+            style: TextStyle(
+              fontSize: 14.5.sp,
+              color: MeetColors.mid,
+              height: 1.6,
+            ),
           )
               .animate()
               .fadeIn(delay: 60.ms, duration: 400.ms)
@@ -188,35 +195,39 @@ class _BottomCard extends StatelessWidget {
         color: MeetColors.surface,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
         boxShadow: [
-          BoxShadow(color: Color(0x12000000), blurRadius: 20, offset: Offset(0, -4)),
+          BoxShadow(
+            color: Color(0x12000000),
+            blurRadius: 20,
+            offset: Offset(0, -4),
+          ),
         ],
       ),
       padding: const EdgeInsets.all(10),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
+          AuthButton(
+            text: 'Continue with Facebook',
+            imageIcon: 'assets/images/facebook_logo.png',
+            color: const Color(0xff4867AA),
+            textColor: Colors.white,
+            iconColor: Colors.white,
+            onTap: onSignIn,
+          ),
 
- AuthButton(
-              text: 'Continue with Facebook',
-              imageIcon: 'assets/images/facebook_logo.png',
-              color: const Color(0xff4867AA),
-              textColor: Colors.white,
-              iconColor: Colors.white,
-              onTap: onSignIn
-            ),
+          SizedBox(height: 1.5.h),
 
-            SizedBox(height: 1.5.h),
+          AuthButton(
+            text: 'Continue with Gmail',
+            imageIcon: 'assets/images/google_logo.png',
+            color: Colors.white,
+            textColor: const Color(0xff444444),
+            iconColor: const Color(0xff444444),
+            onTap: onSignIn,
+          ),
 
-            AuthButton(
-              text: 'Continue with Gmail',
-              imageIcon: 'assets/images/google_logo.png',
-              color: Colors.white,
-              textColor: const Color(0xff444444),
-              iconColor: const Color(0xff444444),
-              onTap: onSignIn
-            ),
-         
           const SizedBox(height: 14),
+
           GestureDetector(
             onTap: onGuest,
             child: const Text(
@@ -228,7 +239,9 @@ class _BottomCard extends StatelessWidget {
               ),
             ),
           ),
+
           SizedBox(height: 4.h),
+
           const Text(
             'By continuing, you agree to our Terms of Service and Privacy Policy.',
             textAlign: TextAlign.center,
@@ -245,6 +258,3 @@ class _BottomCard extends StatelessWidget {
         .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms);
   }
 }
-
-// ─── Auth button ─────────────────────────────────────────────────────────────
-
