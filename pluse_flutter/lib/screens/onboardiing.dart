@@ -208,7 +208,7 @@ class _BottomCard extends StatelessWidget {
         children: [
           AuthButton(
             text: 'Continue with Facebook',
-            imageIcon: 'assets/images/facebook_logo.png',
+             icon: Icons.facebook_rounded,
             color: const Color(0xff4867AA),
             textColor: Colors.white,
             iconColor: Colors.white,

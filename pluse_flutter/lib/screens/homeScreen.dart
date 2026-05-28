@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pluse_flutter/app/appshell.dart';
@@ -11,7 +12,11 @@ import 'package:pluse_flutter/providers/auth_provider.dart';
 import 'package:pluse_flutter/widget/loader.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
+
+
+
+
+final _drawerOpenProvider = StateProvider<bool>((ref) => false);
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -22,10 +27,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _codeCtrl = TextEditingController();
-  bool _isDrawerOpen = false;
-
-  void _openDrawer()  => setState(() => _isDrawerOpen = true);
-  void _closeDrawer() => setState(() => _isDrawerOpen = false);
 
   @override
   void dispose() {
@@ -37,26 +38,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
 
-    // ── Authenticating → full-screen loader ─────────────────────
     if (auth.isAuthenticating) return const LoadingScreen();
 
+    // HomeScreen body never rebuilds due to drawer open/close
     return Stack(
       children: [
+        // ── Main content ─────────────────────────────────────────
         Column(
           children: [
             SizedBox(height: 1.5.h),
             _TopBar(
               ctrl: _codeCtrl,
-              onMenuTap: _openDrawer,
+              onMenuTap: () =>
+                  ref.read(_drawerOpenProvider.notifier).state = true,
               onCodeTap: () {
-                ref.read(shellViewProvider.notifier).state = ShellView.codesearch;
+                FocusScope.of(context).unfocus();
+                ref.read(shellViewProvider.notifier).state =
+                    ShellView.codesearch;
               },
               onProfileTap: () =>
                   ref.read(shellViewProvider.notifier).state = ShellView.profile,
             ),
             SizedBox(height: 3.h),
-    
-            // ── Body switches on auth state ──────────────────
             Expanded(
               child: auth.isAuthenticated
                   ? const _AuthenticatedBody()
@@ -64,47 +67,61 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ],
         ),
-    
-        // FABs — only shown when not loading
+
+        // ── FABs ─────────────────────────────────────────────────
         Positioned(
           bottom: 24,
           right: 20,
           child: _FabStack(
-            joinTap: () =>
-                ref.read(shellViewProvider.notifier).state = ShellView.codesearch,
+            joinTap: () => ref.read(shellViewProvider.notifier).state =
+                ShellView.codesearch,
           ),
         ),
-    
-        // Overlay
-        if (_isDrawerOpen)
+
+        // ── Overlay + Drawer — only these two rebuild on toggle ──
+        const _DrawerLayer(),
+      ],
+    );
+  }
+}
+
+// ─── DrawerLayer — its own Consumer so HomeScreen never rebuilds for it ───────
+
+class _DrawerLayer extends ConsumerWidget {
+  const _DrawerLayer();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isOpen = ref.watch(_drawerOpenProvider);
+
+    void close() => ref.read(_drawerOpenProvider.notifier).state = false;
+
+    return Stack(
+      children: [
+        // Dim overlay
+        if (isOpen)
           Positioned.fill(
             child: GestureDetector(
-              onTap: _closeDrawer,
-              child: AnimatedOpacity(
-                opacity: _isDrawerOpen ? 1 : 0,
-                duration: 250.ms,
-                child: ColoredBox(color: Colors.black.withOpacity(0.55)),
+              onTap: close,
+              child: ColoredBox(
+                color: Colors.black.withOpacity(0.45),
               ),
             ),
           ),
-    
-        // Drawer
+
+        // Drawer — always in tree, just off-screen when closed
         AnimatedPositioned(
-          duration: 320.ms,
+          duration: const Duration(milliseconds: 300),
           curve: Curves.easeOutCubic,
           top: 0,
           bottom: 0,
-          left: _isDrawerOpen ? 0 : -82.w,
+          left: isOpen ? 0 : -82.w,
           width: 82.w,
           child: _MeetDrawer(
-            onClose: _closeDrawer,
+            onClose: close,
             onSettingsTap: () {
-              _closeDrawer();
+              close();
               ref.read(shellViewProvider.notifier).state = ShellView.profile;
-            },
-            onTap: () {
-              _closeDrawer();
-              ref.read(shellViewProvider.notifier).state = ShellView.onboarding;
             },
           ),
         ),
@@ -113,7 +130,108 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   }
 }
 
-// ─── Authenticated body — 3 dummy call history containers ────────────────────
+// ─── Drawer — const children, no animate() calls that can replay ──────────────
+
+class _MeetDrawer extends StatelessWidget {
+  final VoidCallback onClose;
+  final VoidCallback onSettingsTap;
+
+  const _MeetDrawer({
+    required this.onClose,
+    required this.onSettingsTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppColors.primary,
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            SizedBox(height: 2.5.h),
+
+            Center(
+              child: Text(
+                'ELVES MEET',
+                style: GoogleFonts.spaceGrotesk(
+                  fontSize: 25.sp,
+                  fontWeight: FontWeight.bold,
+                  color: MeetColors.dark,
+                ),
+              ),
+            ),
+
+            SizedBox(height: 1.4.h),
+
+            Divider(
+              height: 1,
+              thickness: 0.6,
+              color: MeetColors.mid.withOpacity(0.18),
+            ),
+
+            SizedBox(height: 1.4.h),
+
+            _DrawerItem(
+              icon: Icons.privacy_tip_outlined,
+              title: 'Privacy in Meet',
+              onTap: () {},
+            ),
+            _DrawerItem(
+              icon: Icons.settings_outlined,
+              title: 'Settings',
+              onTap: onSettingsTap,
+            ),
+            _DrawerItem(
+              icon: Icons.help_outline_rounded,
+              title: 'Help & feedback',
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DrawerItem extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final VoidCallback onTap;
+
+  const _DrawerItem({
+    required this.icon,
+    required this.title,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        child: Row(
+          children: [
+            Icon(icon, size: 21, color: MeetColors.dark.withOpacity(0.9)),
+            const SizedBox(width: 18),
+            Text(
+              title,
+              style: GoogleFonts.spaceGrotesk(
+                fontSize: 13.5,
+                fontWeight: FontWeight.w500,
+                color: MeetColors.dark,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// ─── Authenticated body ───────────────────────────────────────────────────────
 
 class _AuthenticatedBody extends StatelessWidget {
   const _AuthenticatedBody();
@@ -134,7 +252,6 @@ class _AuthenticatedBody extends StatelessWidget {
             ),
           ),
           SizedBox(height: 1.5.h),
-          // Dummy containers — swap with real call history widgets later
           ...List.generate(
             3,
             (i) => Container(
@@ -147,7 +264,12 @@ class _AuthenticatedBody extends StatelessWidget {
             )
                 .animate()
                 .fadeIn(delay: (i * 60).ms, duration: 350.ms)
-                .slideY(begin: 0.04, end: 0, delay: (i * 60).ms, duration: 350.ms),
+                .slideY(
+                  begin: 0.04,
+                  end: 0,
+                  delay: (i * 60).ms,
+                  duration: 350.ms,
+                ),
           ),
         ],
       ),
@@ -155,7 +277,7 @@ class _AuthenticatedBody extends StatelessWidget {
   }
 }
 
-// ─── Unauthenticated body — lottie + text ────────────────────────────────────
+// ─── Unauthenticated body ─────────────────────────────────────────────────────
 
 class _UnauthenticatedBody extends StatelessWidget {
   const _UnauthenticatedBody();
@@ -193,7 +315,11 @@ class _UnauthenticatedBody extends StatelessWidget {
           child: Text(
             'Add your account so you can start your own calls and use your contacts in Meet. Without an account, you can only join meetings created by others.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.5.sp, color: MeetColors.mid, height: 1.65),
+            style: TextStyle(
+              fontSize: 12.5.sp,
+              color: MeetColors.mid,
+              height: 1.65,
+            ),
           )
               .animate()
               .fadeIn(delay: 220.ms, duration: 400.ms)
@@ -229,7 +355,11 @@ class _TopBar extends StatelessWidget {
         children: [
           IconButton(
             onPressed: onMenuTap,
-            icon: const Icon(Icons.menu_rounded, color: MeetColors.dark, size: 26),
+            icon: const Icon(
+              Icons.menu_rounded,
+              color: MeetColors.dark,
+              size: 26,
+            ),
             padding: EdgeInsets.zero,
             constraints: const BoxConstraints(),
           ),
@@ -249,7 +379,11 @@ class _TopBar extends StatelessWidget {
                   alignment: Alignment.centerLeft,
                   child: Text(
                     'Enter a code',
-                    style: TextStyle(color: MeetColors.mid, fontSize: 14.sp, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      color: MeetColors.mid,
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -390,80 +524,6 @@ class _WideFab extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w600,
                 color: MeetColors.primary,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// ─── Drawer ───────────────────────────────────────────────────────────────────
-
-class _MeetDrawer extends StatelessWidget {
-  final VoidCallback onClose;
-  final VoidCallback onSettingsTap;
-  final VoidCallback onTap;
-
-  const _MeetDrawer({required this.onClose, required this.onSettingsTap, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return Material(
-      color: AppColors.primary,
-      child: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            SizedBox(height: 2.5.h),
-            Center(
-              child: Text(
-                'ELVES MEET',
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 25.sp,
-                  fontWeight: FontWeight.bold,
-                  color: MeetColors.dark,
-                ),
-              ).animate().fadeIn(duration: 350.ms),
-            ),
-            SizedBox(height: 1.4.h),
-            Divider(height: 1, thickness: 0.6, color: MeetColors.mid.withOpacity(0.18)),
-            SizedBox(height: 1.4.h),
-            _DrawerItem(icon: Icons.privacy_tip_outlined, title: 'Privacy in Meet', onTap: onTap),
-            _DrawerItem(icon: Icons.settings_outlined, title: 'Settings', onTap: onSettingsTap),
-            _DrawerItem(icon: Icons.help_outline_rounded, title: 'Help & feedback', onTap: () {}),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DrawerItem extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-
-  const _DrawerItem({required this.icon, required this.title, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        child: Row(
-          children: [
-            Icon(icon, size: 21, color: MeetColors.dark.withOpacity(0.9)),
-            const SizedBox(width: 18),
-            Text(
-              title,
-              style: GoogleFonts.spaceGrotesk(
-                fontSize: 13.5,
-                fontWeight: FontWeight.w500,
-                color: MeetColors.dark,
               ),
             ),
           ],

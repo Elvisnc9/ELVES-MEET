@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
@@ -108,7 +109,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
             ],
           ),
     
-          SizedBox(height: 1.5.h),
+         
           SizedBox(height: 3.h),
     
           Text(
@@ -201,8 +202,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: GestureDetector(
-              onTap: () => ref.read(shellViewProvider.notifier).state =
-                  ShellView.home,
+              onTap: () => ref.read(shellViewProvider.notifier).state = ShellView.home,
               child: const Icon(
                 Icons.arrow_back_ios_outlined,
                 size: 26,
@@ -217,13 +217,13 @@ class _UnauthenticatedProfile extends ConsumerWidget {
             scale: 2.5,
             child: Lottie.asset(
               'assets/images/Video call chatting animation.json',
-              width: 145,
-              height: 145,
+              width: 180,
+              height: 180,
               fit: BoxFit.contain,
             ),
           ),
     
-          SizedBox(height: 2.5.h),
+          SizedBox(height: 7.h),
     
           Text(
             'Sign in',
@@ -246,7 +246,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
             onTap: () => ref.read(authProvider.notifier).signIn(),
           ),
     
-          SizedBox(height: 1.5.h),
+          SizedBox(height: 2.h),
     
           AuthButton(
             text: 'Continue with Gmail',
@@ -259,29 +259,14 @@ class _UnauthenticatedProfile extends ConsumerWidget {
     
           SizedBox(height: 2.h),
     
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                "Don't have an account? ",
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 14.sp,
-                  color: const Color(0xffA0A0A0),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {},
-                child: Text(
-                  'Sign up',
-                  style: GoogleFonts.spaceGrotesk(
-                    fontSize: 14.sp,
-                    fontWeight: FontWeight.w700,
-                    color: MeetColors.primary,
-                  ),
-                ),
-              ),
-            ],
-          ),
+          const Text(
+            'By continuing, you agree to our Terms of Service and Privacy Policy.',
+            textAlign: TextAlign.center,
+            style: TextStyle(fontSize: 12.5, color: MeetColors.light),
+          )
+              .animate()
+              .fadeIn(delay: 180.ms, duration: 400.ms)
+              .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
     
           const Spacer(flex: 2),
         ],

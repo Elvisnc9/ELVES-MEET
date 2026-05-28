@@ -19,23 +19,52 @@ class AppShell extends ConsumerWidget {
       backgroundColor: AppColors.primary,
       body: SafeArea(
         child: AnimatedSwitcher(
-        duration: const Duration(milliseconds: 350),
+          duration: const Duration(milliseconds: 450),
+
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            final isCodeSearch = child.key == const ValueKey('codesearch');
+
+            // CodeSearch behaves more naturally from Home
+            final beginOffset = isCodeSearch
+                ? const Offset(1.0, 0.0) // comes from right
+                : const Offset(-1.0, 0.0); // other pages from left
+
+            final tween =
+                Tween(
+                  begin: beginOffset,
+                  end: Offset.zero,
+                ).chain(
+                  CurveTween(
+                   curve:  Curves.easeIn
+                  ),
+                );
+
+            return SlideTransition(
+              position: animation.drive(tween),
+              child: child,
+            );
+          },
+
           child: switch (currentView) {
             ShellView.onboarding => const OnboardingScreen(
-                key: ValueKey('onboarding'),
-              ),
+              key: ValueKey('onboarding'),
+            ),
+
             ShellView.loading => const LoadingScreen(
-                key: ValueKey('loading'),
-              ),
+              key: ValueKey('loading'),
+            ),
+
             ShellView.home => const HomeScreen(
-                key: ValueKey('home'),
-              ),
+              key: ValueKey('home'),
+            ),
+
             ShellView.codesearch => const CodeSearchScreen(
-                key: ValueKey('codesearch'),
-              ),
+              key: ValueKey('codesearch'),
+            ),
+
             ShellView.profile => const ProfileScreen(
-                key: ValueKey('profile'),
-              ),
+              key: ValueKey('profile'),
+            ),
           },
         ),
       ),
@@ -47,7 +76,7 @@ class AppShell extends ConsumerWidget {
 
 enum ShellView {
   onboarding,
-  loading,   // ← dedicated loading shell — owns the slide transition
+  loading, // ← dedicated loading shell — owns the slide transition
   home,
   codesearch,
   profile,
