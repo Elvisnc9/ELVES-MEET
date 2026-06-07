@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pluse_flutter/app/appshell.dart';
+import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 class CodeSearchScreen extends ConsumerStatefulWidget {
@@ -53,8 +54,9 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
 
                   if (!mounted) return;
 
-                  ref.read(shellViewProvider.notifier).state = ShellView.home;
-                },
+ref
+    .read(navigationProvider)
+    .goToHome();                },
                 child: const Icon(
                   Icons.arrow_back_rounded,
                   size: 28,

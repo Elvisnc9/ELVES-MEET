@@ -13,75 +13,105 @@ class AppShell extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentView = ref.watch(shellViewProvider);
+    final rootScreen = ref.watch(rootScreenProvider);
+    final overlay = ref.watch(overlayProvider);
 
     return Scaffold(
       backgroundColor: AppColors.primary,
       body: SafeArea(
-        child: AnimatedSwitcher(
-          duration: const Duration(milliseconds: 450),
+        child: Stack(
+          children: [
 
-          transitionBuilder: (Widget child, Animation<double> animation) {
-            final isCodeSearch = child.key == const ValueKey('codesearch');
+            /// ─── ROOT SCREENS ─────────────────────────────
 
-            // CodeSearch behaves more naturally from Home
-            final beginOffset = isCodeSearch
-                ? const Offset(1.0, 0.0) // comes from right
-                : const Offset(-1.0, 0.0); // other pages from left
-
-            final tween =
-                Tween(
-                  begin: beginOffset,
-                  end: Offset.zero,
-                ).chain(
-                  CurveTween(
-                   curve:  Curves.easeIn
-                  ),
-                );
-
-            return SlideTransition(
-              position: animation.drive(tween),
-              child: child,
-            );
-          },
-
-          child: switch (currentView) {
-            ShellView.onboarding => const OnboardingScreen(
-              key: ValueKey('onboarding'),
+            IndexedStack(
+              index: rootScreen.index,
+              children: const [
+                OnboardingScreen(),
+                LoadingScreen(),
+                HomeScreen(),
+                ProfileScreen(),
+              ],
             ),
 
-            ShellView.loading => const LoadingScreen(
-              key: ValueKey('loading'),
-            ),
+            /// ─── OVERLAYS ─────────────────────────────────
 
-            ShellView.home => const HomeScreen(
-              key: ValueKey('home'),
-            ),
+            if (overlay != null)
+              AnimatedSwitcher(
+                duration: const Duration(milliseconds: 350),
 
-            ShellView.codesearch => const CodeSearchScreen(
-              key: ValueKey('codesearch'),
-            ),
+                transitionBuilder:
+                    (child, animation) {
+                  final tween = Tween(
+                    begin: const Offset(1, 0),
+                    end: Offset.zero,
+                  ).chain(
+                    CurveTween(
+                      curve: Curves.easeInOut,
+                    ),
+                  );
 
-            ShellView.profile => const ProfileScreen(
-              key: ValueKey('profile'),
-            ),
-          },
+                  return SlideTransition(
+                    position:
+                        animation.drive(tween),
+                    child: child,
+                  );
+                },
+
+                child: switch (overlay) {
+                  OverlayScreen.codeSearch =>
+                    const CodeSearchScreen(
+                      key: ValueKey(
+                        'codesearch',
+                      ),
+                    ),
+
+                  // ignore: constant_pattern_never_matches_value_type
+                  null => const SizedBox.shrink(),
+                },
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-// ─── Shell views ─────────────────────────────────────────────────────────────
 
-enum ShellView {
+
+
+
+
+/// ─────────────────────────────────────────────────────
+/// ROOT SCREENS
+/// ─────────────────────────────────────────────────────
+
+enum RootScreen {
   onboarding,
-  loading, // ← dedicated loading shell — owns the slide transition
+  loading,
   home,
-  codesearch,
   profile,
 }
 
-final shellViewProvider = StateProvider<ShellView>(
-  (ref) => ShellView.onboarding,
+final rootScreenProvider =
+    StateProvider<RootScreen>(
+  (ref) => RootScreen.onboarding,
+);
+
+
+
+
+
+
+/// ─────────────────────────────────────────────────────
+/// OVERLAYS
+/// ─────────────────────────────────────────────────────
+
+enum OverlayScreen {
+  codeSearch,
+}
+
+final overlayProvider =
+    StateProvider<OverlayScreen?>(
+  (ref) => null,
 );

@@ -9,6 +9,7 @@ import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/core/theme/app_theme.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:pluse_flutter/widget/loader.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
@@ -53,11 +54,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ref.read(_drawerOpenProvider.notifier).state = true,
               onCodeTap: () {
                 FocusScope.of(context).unfocus();
-                ref.read(shellViewProvider.notifier).state =
-                    ShellView.codesearch;
+               ref
+    .read(navigationProvider)
+    .openCodeSearch();
               },
               onProfileTap: () =>
-                  ref.read(shellViewProvider.notifier).state = ShellView.profile,
+                  ref
+    .read(navigationProvider)
+    .goToProfile()
             ),
             SizedBox(height: 3.h),
             Expanded(
@@ -73,8 +77,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           bottom: 24,
           right: 20,
           child: _FabStack(
-            joinTap: () => ref.read(shellViewProvider.notifier).state =
-                ShellView.codesearch,
+            joinTap: () => ref
+    .read(navigationProvider)
+    .openCodeSearch();
           ),
         ),
 
@@ -121,7 +126,7 @@ class _DrawerLayer extends ConsumerWidget {
             onClose: close,
             onSettingsTap: () {
               close();
-              ref.read(shellViewProvider.notifier).state = ShellView.profile;
+              ref.read(navigationProvider).goToProfile();
             },
           ),
         ),
