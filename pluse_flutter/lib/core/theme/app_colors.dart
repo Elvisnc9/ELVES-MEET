@@ -4,7 +4,7 @@ abstract final class MeetColors {
   // Backgrounds
   static const bg       = Color(0xFFECEDF6);
   static const cardBg   = Color(0xFFF3F4FB);
-  static const surface  = Colors.white;
+  static const surface  = Color(0xFFF7F7F7);
  
   // Brand
   static const primary  = Color(0xFF3B4B8C);

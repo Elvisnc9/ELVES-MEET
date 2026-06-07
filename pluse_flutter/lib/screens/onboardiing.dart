@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:pluse_flutter/app/appshell.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:pluse_flutter/screens/profile.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
@@ -26,7 +26,12 @@ const _pages = [
     'assets/images/Video call chatting animation.json',
   ),
   _Page(
-    'Video meeting for everyone',
+    'Bring Everyone Together',
+    'Schedule a time that works for everyone, with virtual backgrounds and live sharing',
+    'assets/images/Video call chatting animation.json',
+  ),
+  _Page(
+    'Connect Beyond Distance',
     'Schedule a time that works for everyone, with virtual backgrounds and live sharing',
     'assets/images/Video call chatting animation.json',
   ),
@@ -35,6 +40,7 @@ const _pages = [
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 final _pageIdxProvider = StateProvider<int>((ref) => 0);
+final _introCompleteProvider = StateProvider<bool>((ref) => false);
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
@@ -55,43 +61,56 @@ class _State extends ConsumerState<OnboardingScreen> {
   }
 
 Future<void> _handleSignIn() async {
-  // Capture both notifiers BEFORE any await
-  final shell = ref.read(shellViewProvider.notifier);
-  final auth  = ref.read(authProvider.notifier);
+  final nav  = ref.read(navigationProvider);
+  final auth = ref.read(authProvider.notifier);
 
-  shell.state = ShellView.loading;
+  nav.goToLoading();
   await auth.signIn();
-  shell.state = ShellView.home;  // safe — no ref call after await
+  nav.goToHome();
 }
 
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
 
-    return Column(
-      children: [
-        Expanded(
-          child: PageView.builder(
-            controller: _ctrl,
-            itemCount: _pages.length,
-            onPageChanged: (i) =>
-                ref.read(_pageIdxProvider.notifier).state = i,
-            itemBuilder: (_, i) => _Slide(page: _pages[i]),
+    return TweenAnimationBuilder<double>(
+    tween: Tween(begin: 0.0, end: 1.0),
+    duration: const Duration(milliseconds: 520),
+    curve: Curves.easeOutCubic,
+    builder: (context, value, child) {
+      return Opacity(
+        opacity: value,
+        child: Transform.translate(
+          offset: Offset(0, 28 * (1 - value)),  // slides up 28px
+          child: child,
+        ),
+      );
+    },
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              controller: _ctrl,
+              itemCount: _pages.length,
+              onPageChanged: (i) =>
+                  ref.read(_pageIdxProvider.notifier).state = i,
+              itemBuilder: (_, i) => _Slide(page: _pages[i]),
+            ),
           ),
-        ),
-
-        SizedBox(height: 2.h),
-        _Dots(current: idx, count: _pages.length),
-        SizedBox(height: 3.h),
-
-        _BottomCard(
-          onSignIn: _handleSignIn,
-          onGuest: () {
-            ref.read(authProvider.notifier).continueAsGuest();
-            ref.read(shellViewProvider.notifier).state = ShellView.home;
-          },
-        ),
-      ],
+      
+          SizedBox(height: 2.h),
+          _Dots(current: idx, count: _pages.length),
+          SizedBox(height: 3.h),
+      
+          _BottomCard(
+            onSignIn: _handleSignIn,
+            onGuest: () {
+              ref.read(authProvider.notifier).continueAsGuest();
+              ref.read(navigationProvider).goToHome();
+            },
+          ),
+        ],
+      ),
     );
   }
 }
@@ -114,7 +133,7 @@ class _Slide extends StatelessWidget {
             page.title,
             textAlign: TextAlign.center,
             style: GoogleFonts.spaceGrotesk(
-              fontSize: 30.sp,
+              fontSize: 40.sp,
               fontWeight: FontWeight.bold,
               color: MeetColors.dark,
               height: 1.25,
@@ -130,7 +149,7 @@ class _Slide extends StatelessWidget {
           Text(
             page.subtitle,
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: GoogleFonts.inter(
               fontSize: 14.5.sp,
               color: MeetColors.mid,
               height: 1.6,

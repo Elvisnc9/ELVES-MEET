@@ -31,6 +31,7 @@ dependencies:
     path: ../pluse_client
   serverpod_auth_idp_flutter: 3.2.3
   serverpod_flutter: 3.2.3
+  flutter_native_splash:
   flutter_riverpod:
   flutter_animate:
   shared_preferences: 
@@ -38,6 +39,15 @@ dependencies:
   the_responsive_builder:
   google_fonts:
   lottie:
+
+
+flutter_native_splash:
+  color: "#F7F7F7"
+  fullscreen: true 
+  image: assets/images/elves_logo.png # swap with your actual app icon asset
+  android_12:
+    color: "#F7F7F7"
+    image: assets/images/elves_logo.png
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'

@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:pluse_flutter/app/appshell.dart';
-import 'package:pluse_flutter/core/theme/app_theme.dart';
 
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
@@ -11,6 +10,7 @@ import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),

@@ -81,7 +81,7 @@ class AppTheme {
 
 
 class AppColors {
-  static const Color primary = Color(0xFFFEFACD);
+static const Color primary = Color(0xFFF5F5F5);
   static const Color secondary = Color(0xFF5F4A8B);
 
 

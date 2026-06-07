@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:pluse_flutter/app/appshell.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
@@ -53,10 +52,7 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                   await Future.delayed(const Duration(milliseconds: 120));
 
                   if (!mounted) return;
-
-ref
-    .read(navigationProvider)
-    .goToHome();                },
+ref.read(navigationProvider).closeOverlay();                },
                 child: const Icon(
                   Icons.arrow_back_rounded,
                   size: 28,

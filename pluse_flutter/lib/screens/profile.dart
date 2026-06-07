@@ -3,10 +3,10 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:pluse_flutter/app/appshell.dart';
 import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 // ─── Entry point — picks view based on auth state ─────────────────────────────
@@ -42,8 +42,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
             children: [
               _CircleIcon(
                 icon: Icons.arrow_back_ios_new_rounded,
-                onTap: () => ref.read(shellViewProvider.notifier).state =
-                    ShellView.home,
+                onTap: () => ref.read(navigationProvider).goToHome()
               ),
               const Spacer(),
               Text(
@@ -202,7 +201,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
           Align(
             alignment: Alignment.centerLeft,
             child: GestureDetector(
-              onTap: () => ref.read(shellViewProvider.notifier).state = ShellView.home,
+              onTap: () => ref.read(navigationProvider).goToHome(),
               child: const Icon(
                 Icons.arrow_back_ios_outlined,
                 size: 26,
