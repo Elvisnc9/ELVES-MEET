@@ -29,8 +29,8 @@ dependencies:
     sdk: flutter
   pluse_client:
     path: ../pluse_client
-  serverpod_auth_idp_flutter: 3.2.3
-  serverpod_flutter: 3.2.3
+  serverpod_auth_idp_flutter: 3.4.9
+  serverpod_flutter: 3.4.9
   flutter_native_splash:
   flutter_riverpod:
   flutter_animate:
@@ -43,11 +43,16 @@ dependencies:
 
 flutter_native_splash:
   color: "#F7F7F7"
-  fullscreen: true 
-  image: assets/images/elves_logo.png # swap with your actual app icon asset
+  fullscreen: true
+  image: assets/images/elves_logo.png
+  android_gravity: center
+
   android_12:
     color: "#F7F7F7"
     image: assets/images/elves_logo.png
+    icon_background_color: "#F7F7F7"
+    image_dark: assets/images/elves_logo.png
+    color_dark: "#F7F7F7"
 
 dev_dependencies:
   flutter_lints: '>=3.0.0 <7.0.0'
