@@ -1,10 +1,11 @@
 
-import 'package:serverpod/protocol.dart';
+
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/google.dart';
 
 import 'src/generated/endpoints.dart';
+import 'src/generated/protocol.dart';
 
 void run(List<String> args) async {
   final pod = Serverpod(

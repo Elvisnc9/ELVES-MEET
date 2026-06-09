@@ -4,11 +4,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:the_responsive_builder/the_responsive_builder.dart';
+
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:pluse_flutter/screens/profile.dart';
-import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -40,7 +41,7 @@ const _pages = [
 // ─── Provider ────────────────────────────────────────────────────────────────
 
 final _pageIdxProvider = StateProvider<int>((ref) => 0);
-final _introCompleteProvider = StateProvider<bool>((ref) => false);
+
 
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
@@ -53,6 +54,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 
 class _State extends ConsumerState<OnboardingScreen> {
   final _ctrl = PageController();
+  bool _isSigningIn = false;
 
   @override
   void dispose() {
@@ -61,18 +63,22 @@ class _State extends ConsumerState<OnboardingScreen> {
   }
 
 Future<void> _handleSignIn() async {
-  final nav  = ref.read(navigationProvider);
-  final auth = ref.read(authProvider.notifier);
+    if (_isSigningIn) return;
+    setState(() => _isSigningIn = true);
 
-  nav.goToLoading();
-  try {
-    await auth.signInWithGoogle();
-    nav.goToHome();
-  } catch (e) {
-    nav.goToOnboarding();
-    // show a snackbar or error
+    final nav  = ref.read(navigationProvider);
+    final auth = ref.read(authProvider.notifier);
+
+    try {
+      await auth.signInWithGoogle();
+      nav.goToLoading();
+      await Future.delayed(const Duration(milliseconds: 700));
+      nav.goToHome();
+    } catch (e) {
+      setState(() => _isSigningIn = false);  // ← reset on error
+      // show snackbar
+    }
   }
-}
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
@@ -112,6 +118,7 @@ Future<void> _handleSignIn() async {
               ref.read(authProvider.notifier).continueAsGuest();
               ref.read(navigationProvider).goToHome();
             },
+            isSigningIn: _isSigningIn,
           ),
         ],
       ),
@@ -208,8 +215,9 @@ class _Dots extends StatelessWidget {
 class _BottomCard extends StatelessWidget {
   final VoidCallback onSignIn;
   final VoidCallback onGuest;
+  final bool isSigningIn;
 
-  const _BottomCard({required this.onSignIn, required this.onGuest});
+  const _BottomCard({required this.onSignIn, required this.onGuest, this.isSigningIn = false,});
 
   @override
   Widget build(BuildContext context) {
@@ -231,11 +239,13 @@ class _BottomCard extends StatelessWidget {
         children: [
           AuthButton(
             text: 'Continue with Facebook',
-             icon: Icons.facebook_rounded,
+            icon: Icons.facebook_rounded,
             color: const Color(0xff4867AA),
             textColor: Colors.white,
             iconColor: Colors.white,
-            onTap: onSignIn,
+            onTap: (){},
+             isloading: false,
+            
           ),
 
           SizedBox(height: 1.5.h),
@@ -246,7 +256,8 @@ class _BottomCard extends StatelessWidget {
             color: Colors.white,
             textColor: const Color(0xff444444),
             iconColor: const Color(0xff444444),
-            onTap: onSignIn,
+            onTap: onSignIn, 
+            isloading: isSigningIn,
           ),
 
           const SizedBox(height: 14),

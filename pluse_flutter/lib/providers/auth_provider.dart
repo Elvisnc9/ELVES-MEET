@@ -14,33 +14,26 @@ Future<void> signInWithGoogle() async {
   state = AuthStatus.authenticating;
   try {
     final signIn = GoogleSignIn.instance;
-
     await signIn.initialize(
-      serverClientId: '1017604801521-ggo26v7q95e8bm2jh55mtoknefpgf8e1.apps.googleusercontent.com', // from Google Cloud Console
+      serverClientId: '1017604801521-ggo26v7q95e8bm2jh55mtoknefpgf8e1.apps.googleusercontent.com',
+      
     );
-
     final googleUser = await signIn.authenticate();
-
-    // idToken comes from authentication
     final idToken = googleUser.authentication.idToken;
     if (idToken == null) throw Exception('No ID token received');
-
-    // accessToken requires a separate authorization request in v7
     final authorization = await googleUser.authorizationClient
         .authorizationForScopes(['email', 'profile']);
-
     await client.googleIdp.login(
       idToken: idToken,
       accessToken: authorization?.accessToken,
     );
-
     state = AuthStatus.authenticated;
+    // ← no navigation here, let the caller handle it
   } catch (e) {
     state = AuthStatus.unauthenticated;
     rethrow;
   }
 }
-
   void continueAsGuest() => state = AuthStatus.unauthenticated;
 
  Future<void> signOut() async {

@@ -236,25 +236,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
     
           SizedBox(height: 3.h),
     
-          AuthButton(
-            text: 'Continue with Facebook',
-            icon: Icons.facebook_rounded,
-            color: const Color(0xff4867AA),
-            textColor: Colors.white,
-            iconColor: Colors.white,
-            onTap: () {}
-          ),
-    
-          SizedBox(height: 2.h),
-    
-          AuthButton(
-            text: 'Continue with Gmail',
-            imageIcon: 'assets/images/google_logo.png',
-            color: Colors.white,
-            textColor: const Color(0xff444444),
-            iconColor: const Color(0xff444444),
-            onTap: () {},
-          ),
+          
     
           SizedBox(height: 2.h),
     
@@ -394,15 +376,17 @@ class AuthButton extends StatelessWidget {
   final Color textColor;
   final Color iconColor;
   final VoidCallback onTap;
+  final bool isloading;
 
-  const AuthButton({
+   const AuthButton( {super.key, 
     required this.text,
     required this.color,
     required this.textColor,
     required this.iconColor,
     required this.onTap,
+    required this.isloading,
     this.icon,
-    this.imageIcon,
+    this.imageIcon, 
   });
 
   @override
@@ -410,7 +394,7 @@ class AuthButton extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 25),
       child: GestureDetector(
-        onTap: onTap,
+        onTap: isloading ? null : onTap, 
         child: Container(
           height: 60,
           width: double.infinity,
@@ -434,8 +418,22 @@ class AuthButton extends StatelessWidget {
                     ? Image.asset(imageIcon!, width: 25, height: 25)
                     : Icon(icon, size: 30, color: iconColor),
               ),
+
+              if (isloading)
+                Positioned(
+                  right: 25,
+                  child: SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 3.5,
+                      valueColor: AlwaysStoppedAnimation<Color>(iconColor),
+                    ),
+                  ),
+                ),
+
               Text(
-                text,
+                isloading ? 'Signing in...' : text,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 16.sp,
                   fontWeight: FontWeight.bold,
