@@ -39,7 +39,7 @@ dependencies:
   the_responsive_builder:
   google_fonts:
   lottie:
-
+  google_sign_in:
 
 flutter_native_splash:
   color: "#F7F7F7"

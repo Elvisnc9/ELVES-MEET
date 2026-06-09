@@ -242,7 +242,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
             color: const Color(0xff4867AA),
             textColor: Colors.white,
             iconColor: Colors.white,
-            onTap: () => ref.read(authProvider.notifier).signIn(),
+            onTap: () {}
           ),
     
           SizedBox(height: 2.h),
@@ -253,7 +253,7 @@ class _UnauthenticatedProfile extends ConsumerWidget {
             color: Colors.white,
             textColor: const Color(0xff444444),
             iconColor: const Color(0xff444444),
-            onTap: () => ref.read(authProvider.notifier).signIn(),
+            onTap: () {},
           ),
     
           SizedBox(height: 2.h),

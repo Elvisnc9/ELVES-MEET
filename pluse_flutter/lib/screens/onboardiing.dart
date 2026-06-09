@@ -65,10 +65,14 @@ Future<void> _handleSignIn() async {
   final auth = ref.read(authProvider.notifier);
 
   nav.goToLoading();
-  await auth.signIn();
-  nav.goToHome();
+  try {
+    await auth.signInWithGoogle();
+    nav.goToHome();
+  } catch (e) {
+    nav.goToOnboarding();
+    // show a snackbar or error
+  }
 }
-
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
