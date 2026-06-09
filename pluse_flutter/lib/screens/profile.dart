@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
 import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
-import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/providers/auth_provider.dart' hide navigationProvider;
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 

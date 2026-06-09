@@ -1,10 +1,16 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:pluse_flutter/core/enums.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pluse_flutter/main.dart';
+import 'package:pluse_flutter/providers/navigation_controller.dart';
 
 final authProvider =
     StateNotifierProvider<AuthNotifier, AuthStatus>((ref) => AuthNotifier());
+
+    final navigationProvider = Provider<NavigationController>((ref) {
+  return NavigationController(ref);});
+
 
 class AuthNotifier extends StateNotifier<AuthStatus> {
   AuthNotifier() : super(AuthStatus.unauthenticated);
@@ -34,7 +40,9 @@ Future<void> signInWithGoogle() async {
     rethrow;
   }
 }
-  void continueAsGuest() => state = AuthStatus.unauthenticated;
+  void continueAsGuest() {state = AuthStatus.unauthenticated;
+      
+  }
 
  Future<void> signOut() async {
   await GoogleSignIn.instance.signOut();
