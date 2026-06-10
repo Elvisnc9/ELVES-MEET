@@ -23,6 +23,7 @@ void run(List<String> args) async {
         clientSecret: GoogleClientSecret.fromJsonString(
           pod.getPassword('googleClientSecret')!,
         ),
+        clockSkewTolerance: Duration(seconds: 60),
       ),
     ],
   );

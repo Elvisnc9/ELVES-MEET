@@ -62,22 +62,20 @@ class _State extends ConsumerState<OnboardingScreen> {
   }
 
 Future<void> _handleSignIn() async {
-    if (_isSigningIn) return;
-    setState(() => _isSigningIn = true);
-
-    final nav  = ref.read(navigationProvider);
-    final auth = ref.read(authProvider.notifier);
-
-    try {
-      await auth.signInWithGoogle();
+  if (_isSigningIn) return;
+  setState(() => _isSigningIn = true);
  
-      await Future.delayed(const Duration(milliseconds: 700));
-      nav.goToHome();
-    } catch (e) {
-      setState(() => _isSigningIn = false);  // ← reset on error
-      // show snackbar
-    }
+  final nav  = ref.read(navigationProvider);
+  final auth = ref.read(authProvider.notifier);
+ 
+  try {
+    await auth.signInWithGoogle();
+    nav.goToLoading(); // loader auto-advances to home after 1s
+  } catch (e) {
+    setState(() => _isSigningIn = false);
+    // show snackbar
   }
+}
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
@@ -98,6 +96,7 @@ Future<void> _handleSignIn() async {
       child: Column(
         children: [
           Expanded(
+            flex: 2,
             child: PageView.builder(
               controller: _ctrl,
               itemCount: _pages.length,
@@ -107,17 +106,15 @@ Future<void> _handleSignIn() async {
             ),
           ),
       
-          SizedBox(height: 2.h),
+          SizedBox(height: 1.h),
           _Dots(current: idx, count: _pages.length),
-          SizedBox(height: 3.h),
+          SizedBox(height: 2.h),
       
           _BottomCard(
             onSignIn: _handleSignIn,
             onGuest: () async{
               ref.read(authProvider.notifier).continueAsGuest();
               ref.read(navigationProvider).goToLoading();
-            await  Future.delayed(const Duration(milliseconds: 700));
-               ref.read(navigationProvider).goToHome();
 
             },
             isSigningIn: _isSigningIn,
@@ -223,74 +220,76 @@ class _BottomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: const BoxDecoration(
-        color: MeetColors.surface,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
-        boxShadow: [
-          BoxShadow(
-            color: Color(0x12000000),
-            blurRadius: 20,
-            offset: Offset(0, -4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          AuthButton(
-            text: 'Continue with Facebook',
-            icon: Icons.facebook_rounded,
-            color: const Color(0xff4867AA),
-            textColor: Colors.white,
-            iconColor: Colors.white,
-            onTap: (){},
-             isloading: false,
-            
-          ),
-
-          SizedBox(height: 1.5.h),
-
-          AuthButton(
-            text: 'Continue with Gmail',
-            imageIcon: 'assets/images/google_logo.png',
-            color: Colors.white,
-            textColor: const Color(0xff444444),
-            iconColor: const Color(0xff444444),
-            onTap: onSignIn, 
-            isloading: isSigningIn,
-          ),
-
-          const SizedBox(height: 14),
-
-          GestureDetector(
-            onTap: onGuest,
-            child: const Text(
-              'Use Meet without an account',
-              style: TextStyle(
-                color: MeetColors.primary,
-                fontSize: 14.5,
-                fontWeight: FontWeight.w500,
+    return Expanded(
+      flex: 1,
+      child: Container(
+        decoration: const BoxDecoration(
+          color: MeetColors.surface,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+          boxShadow: [
+            BoxShadow(
+              color: Color(0x12000000),
+              blurRadius: 20,
+              offset: Offset(0, -4),
+            ),
+          ],
+        ),
+        padding: const EdgeInsets.all(10),
+        child: Column(
+          children: [
+            AuthButton(
+              text: 'Continue with Facebook',
+              icon: Icons.facebook_rounded,
+              color: const Color(0xff4867AA),
+              textColor: Colors.white,
+              iconColor: Colors.white,
+              onTap: (){},
+               isloading: false,
+              
+            ),
+      
+            SizedBox(height: 1.5.h),
+      
+            AuthButton(
+              text: 'Continue with Gmail',
+              imageIcon: 'assets/images/google_logo.png',
+              color: Colors.white,
+              textColor: const Color(0xff444444),
+              iconColor: const Color(0xff444444),
+              onTap: onSignIn, 
+              isloading: isSigningIn,
+            ),
+      
+            const SizedBox(height: 14),
+      
+            GestureDetector(
+              onTap: onGuest,
+              child: const Text(
+                'Use Meet without an account',
+                style: TextStyle(
+                  color: MeetColors.primary,
+                  fontSize: 14.5,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
-          ),
-
-          SizedBox(height: 4.h),
-
-          const Text(
-            'By continuing, you agree to our Terms of Service and Privacy Policy.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.5, color: MeetColors.light),
-          )
-              .animate()
-              .fadeIn(delay: 180.ms, duration: 400.ms)
-              .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
-        ],
-      ),
-    )
-        .animate()
-        .fadeIn(delay: 180.ms, duration: 400.ms)
-        .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms);
+      
+            SizedBox(height: 3.h,),
+      
+            const Text(
+              'By continuing, you agree to our Terms of Service and Privacy Policy.',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 12.5, color: MeetColors.light),
+            )
+                .animate()
+                .fadeIn(delay: 180.ms, duration: 400.ms)
+                .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
+          ],
+        ),
+      )
+          .animate()
+          .fadeIn(delay: 180.ms, duration: 400.ms)
+          .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
+    );
   }
 }
