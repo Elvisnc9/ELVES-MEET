@@ -40,7 +40,9 @@ Future<void> signInWithGoogle() async {
     rethrow;
   }
 }
-  void continueAsGuest() {state = AuthStatus.unauthenticated;
+  void continueAsGuest(
+    
+  ) {state = AuthStatus.unauthenticated;
       
   }
 

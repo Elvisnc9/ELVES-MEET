@@ -8,7 +8,6 @@ import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
-import 'package:pluse_flutter/providers/navigation_controller.dart' hide navigationProvider;
 import 'package:pluse_flutter/screens/profile.dart';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
@@ -114,9 +113,12 @@ Future<void> _handleSignIn() async {
       
           _BottomCard(
             onSignIn: _handleSignIn,
-            onGuest: () {
+            onGuest: () async{
               ref.read(authProvider.notifier).continueAsGuest();
-              ref.read(navigationProvider).goToHome();
+              ref.read(navigationProvider).goToLoading();
+            await  Future.delayed(const Duration(milliseconds: 700));
+               ref.read(navigationProvider).goToHome();
+
             },
             isSigningIn: _isSigningIn,
           ),
