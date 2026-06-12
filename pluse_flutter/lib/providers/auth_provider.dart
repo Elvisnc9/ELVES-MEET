@@ -52,16 +52,15 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     state = AuthStatus.unauthenticated;
   }
 
-  Future<void> signOut() async {
+Future<void> signOut() async {
   try {
-    await client.auth.signOutDevice();
-    await client.authSessionManager.signOutDevice();
+    await client.auth.signOutDevice();   // tells server
+    await client.authSessionManager.signOutDevice(); // clears local token
     await GoogleSignIn.instance.signOut();
   } catch (_) {}
 
   state = AuthStatus.unauthenticated;
 }
-
 
 }
 
