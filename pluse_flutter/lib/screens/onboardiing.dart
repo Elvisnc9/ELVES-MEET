@@ -112,10 +112,7 @@ Future<void> _handleSignIn() async {
       
           BottomCard(
             onSignIn: _handleSignIn,
-            onGuest: () async{
-              ref.read(authProvider.notifier).continueAsGuest();
-              ref.read(navigationProvider).goToLoading();
-            },
+           
             isSigningIn: _isSigningIn,
         
           ),
@@ -213,11 +210,11 @@ class _Dots extends StatelessWidget {
 
 class BottomCard extends StatelessWidget {
   final VoidCallback onSignIn;
-  final VoidCallback onGuest;
+ 
   final bool isSigningIn;
 
 
-  const BottomCard({super.key, required this.onSignIn, required this.onGuest, this.isSigningIn = false, });
+  const BottomCard({super.key, required this.onSignIn, this.isSigningIn = false, });
 
   @override
   Widget build(BuildContext context) {
@@ -236,7 +233,8 @@ class BottomCard extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.all(10),
-        child: AuthButtonPack(onSignIn: onSignIn, isSigningIn: isSigningIn, onGuest: onGuest),
+        child: AuthButtonPack(
+          onSignIn: onSignIn, isSigningIn: isSigningIn),
       )
           .animate()
           .fadeIn(delay: 180.ms, duration: 400.ms)
@@ -250,12 +248,12 @@ class AuthButtonPack extends StatelessWidget {
     super.key,
     required this.onSignIn,
     required this.isSigningIn,
-    required this.onGuest,
+    
   });
 
   final VoidCallback onSignIn;
   final bool isSigningIn;
-  final VoidCallback onGuest;
+
 
   @override
   Widget build(BuildContext context) {
@@ -287,9 +285,8 @@ class AuthButtonPack extends StatelessWidget {
         const SizedBox(height: 14),
           
         GestureDetector(
-          onTap: onGuest,
           child: const Text(
-            'Use Meet without an account',
+            'Get Started With Elves Meet',
             style: TextStyle(
               color: MeetColors.primary,
               fontSize: 14.5,

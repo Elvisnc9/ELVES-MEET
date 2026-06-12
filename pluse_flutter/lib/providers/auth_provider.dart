@@ -4,6 +4,7 @@ import 'package:pluse_flutter/core/enums.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:pluse_flutter/main.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
+import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 final authProvider =
     StateNotifierProvider<AuthNotifier, AuthStatus>((ref) => AuthNotifier());
@@ -52,9 +53,18 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
   }
 
   Future<void> signOut() async {
-    try {
-      await GoogleSignIn.instance.signOut();
-    } catch (_) {}
-    state = AuthStatus.unauthenticated;
-  }
+  try {
+    await client.auth.signOutDevice();
+    await client.authSessionManager.signOutDevice();
+    await GoogleSignIn.instance.signOut();
+  } catch (_) {}
+
+  state = AuthStatus.unauthenticated;
 }
+
+
+}
+
+final isLoggedInProvider = Provider<bool>((ref) {
+  return client.authSessionManager.isAuthenticated;
+});

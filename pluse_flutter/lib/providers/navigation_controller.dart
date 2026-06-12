@@ -19,7 +19,7 @@ enum RootScreen {
 
 final rootScreenProvider =
     StateProvider<RootScreen>(
-  (ref) => RootScreen.onboarding,
+  (ref) => RootScreen.loading,
 );
 
 

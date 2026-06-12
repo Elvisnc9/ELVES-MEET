@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pluse_flutter/core/theme/app_theme.dart';
+import 'package:pluse_flutter/providers/auth_provider.dart';
 import 'package:pluse_flutter/screens/codeSearch.dart';
 import 'package:pluse_flutter/screens/homeScreen.dart';
 import 'package:pluse_flutter/screens/onboardiing.dart';
@@ -8,11 +9,31 @@ import 'package:pluse_flutter/screens/profile.dart';
 import 'package:pluse_flutter/widget/loader.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+
+class _AppShellState extends ConsumerState<AppShell> {
+
+
+  @override
+  void initState() {
+    super.initState();
+     WidgetsBinding.instance.addPostFrameCallback((_) {
+    final isLoggedIn = ref.read(isLoggedInProvider);
+    if (isLoggedIn) {
+      ref.read(rootScreenProvider.notifier).state = RootScreen.home;
+    } else {
+      ref.read(rootScreenProvider.notifier).state = RootScreen.onboarding;
+    }
+  });
+  }
+  @override
+  Widget build(BuildContext context) {
     final rootScreen = ref.watch(rootScreenProvider);
 
     return Scaffold(

@@ -40,7 +40,8 @@ dependencies:
   google_fonts:
   lottie:
   google_sign_in:
-  permission_handler: 
+  permission_handler:
+  flutter_secure_storage: 
 
 flutter_native_splash:
   color: "#F7F7F7"

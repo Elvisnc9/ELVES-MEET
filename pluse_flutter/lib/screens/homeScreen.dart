@@ -60,9 +60,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
             SizedBox(height: 3.h),
             Expanded(
-              child: auth.isAuthenticated
-                  ? const AuthenticatedBody()
-                  : const UnauthenticatedBody(),
+              child: const AuthenticatedBody()
+                  
             ),
           ],
         ),
@@ -98,7 +97,15 @@ class AuthenticatedBody extends StatelessWidget {
               color: MeetColors.dark,
             ),
           ),
+
+
+
           SizedBox(height: 1.5.h),
+
+           Lottie.asset(
+          'assets/images/Video call chatting animation.json',
+          fit: BoxFit.contain,
+        ),
           ...List.generate(
             3,
             (i) => Container(
@@ -124,50 +131,3 @@ class AuthenticatedBody extends StatelessWidget {
   }
 }
 
-class UnauthenticatedBody extends StatelessWidget {
-  const UnauthenticatedBody({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Lottie.asset(
-          'assets/images/Video call chatting animation.json',
-          fit: BoxFit.contain,
-        ),
-        SizedBox(height: 5.5.h),
-        Text(
-          'Select an account to do \nmore in Meet',
-          textAlign: TextAlign.center,
-          style: GoogleFonts.spaceGrotesk(
-            fontSize: 24.sp,
-            fontWeight: FontWeight.w400,
-            color: MeetColors.dark,
-            height: 1.3,
-            letterSpacing: -0.3,
-          ),
-        )
-            .animate()
-            .fadeIn(delay: 160.ms, duration: 400.ms)
-            .slideY(begin: 0.05, end: 0, delay: 160.ms, duration: 400.ms),
-        SizedBox(height: 1.5.h),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 48),
-          child: Text(
-            'Add your account so you can start your own calls and use your contacts in Meet. Without an account, you can only join meetings created by others.',
-            textAlign: TextAlign.center,
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 12.5.sp,
-              color: MeetColors.mid,
-              height: 1.65,
-            ),
-          )
-              .animate()
-              .fadeIn(delay: 220.ms, duration: 400.ms)
-              .slideY(begin: 0.05, end: 0, delay: 220.ms, duration: 400.ms),
-        ),
-        SizedBox(height: 14.h),
-      ],
-    );
-  }
-}

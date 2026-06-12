@@ -14,12 +14,12 @@ final client = Client('http://192.168.101.254:8080/')
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+  await client.authSessionManager.initialize();
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
-client.auth.initialize();
+
 
 
 
