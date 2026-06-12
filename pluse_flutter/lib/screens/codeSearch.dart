@@ -52,7 +52,8 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                   await Future.delayed(const Duration(milliseconds: 120));
 
                   if (!mounted) return;
-ref.read(navigationProvider).closeOverlay();                },
+ref.read(navigationProvider).goToHome();         
+       },
                 child: const Icon(
                   Icons.arrow_back_rounded,
                   size: 28,

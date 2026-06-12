@@ -1,5 +1,3 @@
-
-
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/google.dart';
@@ -26,6 +24,16 @@ void run(List<String> args) async {
         clockSkewTolerance: Duration(seconds: 60),
       ),
     ],
+    userProfileConfig: UserProfileConfig(
+      onAfterUserProfileCreated:
+          (session, userProfile, {required transaction}) async {
+            await AuthServices.instance.userProfiles.setDefaultUserImage(
+              session,
+              userProfile.authUserId,
+              transaction: transaction,
+            );
+          },
+    ),
   );
 
   await pod.start();

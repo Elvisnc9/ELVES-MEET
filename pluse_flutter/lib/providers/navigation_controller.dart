@@ -14,6 +14,7 @@ enum RootScreen {
   loading,
   home,
   profile,
+  codeSearch,
 }
 
 final rootScreenProvider =
@@ -29,14 +30,7 @@ final rootScreenProvider =
 /// OVERLAYS
 /// ─────────────────────────────────────────────────────
 
-enum OverlayScreen {
-  codeSearch,
-}
 
-final overlayProvider =
-    StateProvider<OverlayScreen?>(
-  (ref) => null,
-);
 
 
 
@@ -52,7 +46,7 @@ class NavigationController {
   NavigationController(this.ref);
 
 
-
+final drawerOpenProvider = StateProvider<bool>((ref) => false);
 
 
   /// ─── ROOT NAVIGATION ──────────────────────────────
@@ -89,15 +83,11 @@ class NavigationController {
 
   void openCodeSearch() {
     ref
-        .read(overlayProvider.notifier)
-        .state = OverlayScreen.codeSearch;
+        .read(rootScreenProvider.notifier)
+        .state = RootScreen.codeSearch;
   }
 
-  void closeOverlay() {
-    ref
-        .read(overlayProvider.notifier)
-        .state = null;
-  }
+  
 
 
 
@@ -106,14 +96,10 @@ class NavigationController {
   /// ─── BACK NAVIGATION ──────────────────────────────
 
   void goBack() {
-    final overlay =
-        ref.read(overlayProvider);
+ 
 
     /// Close overlay first
-    if (overlay != null) {
-      closeOverlay();
-      return;
-    }
+ 
 
     /// Optional root fallback
     final root =

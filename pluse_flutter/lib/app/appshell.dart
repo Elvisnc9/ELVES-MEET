@@ -14,7 +14,6 @@ class AppShell extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rootScreen = ref.watch(rootScreenProvider);
-    final overlay = ref.watch(overlayProvider);
 
     return Scaffold(
       backgroundColor: AppColors.primary,
@@ -24,7 +23,7 @@ class AppShell extends ConsumerWidget {
 
             /// ─── ROOT SCREENS ─────────────────────────────
 AnimatedSwitcher(
-  duration: const Duration(milliseconds: 600),
+  duration: const Duration(milliseconds: 200),
   transitionBuilder: (child, animation) {
     final tween = Tween(
       begin: const Offset(-1.0, 0),
@@ -42,46 +41,14 @@ AnimatedSwitcher(
       RootScreen.onboarding => const OnboardingScreen(),
       RootScreen.loading    => const LoadingScreen(),
       RootScreen.home       => const HomeScreen(),
+      RootScreen.codeSearch => const CodeSearchScreen(),
       RootScreen.profile    => const ProfileScreen(),
     },
   ),
 ),
             /// ─── OVERLAYS ─────────────────────────────────
 
-            if (overlay != null)
-              AnimatedSwitcher(
-                duration: const Duration(milliseconds: 350),
-
-                transitionBuilder:
-                    (child, animation) {
-                  final tween = Tween(
-                    begin: const Offset(1, 0),
-                    end: Offset.zero,
-                  ).chain(
-                    CurveTween(
-                      curve: Curves.easeInOut,
-                    ),
-                  );
-
-                  return SlideTransition(
-                    position:
-                        animation.drive(tween),
-                    child: child,
-                  );
-                },
-
-                child: switch (overlay) {
-                  OverlayScreen.codeSearch =>
-                    const CodeSearchScreen(
-                      key: ValueKey(
-                        'codesearch',
-                      ),
-                    ),
-
-                  // ignore: constant_pattern_never_matches_value_type
-                  null => const SizedBox.shrink(),
-                },
-              ),
+          
           ],
         ),
       ),

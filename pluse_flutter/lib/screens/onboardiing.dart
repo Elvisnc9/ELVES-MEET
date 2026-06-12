@@ -4,11 +4,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
+import 'package:pluse_flutter/widget/authButton.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
-import 'package:pluse_flutter/screens/profile.dart';
 
 // ─── Data ────────────────────────────────────────────────────────────────────
 
@@ -110,14 +110,14 @@ Future<void> _handleSignIn() async {
           _Dots(current: idx, count: _pages.length),
           SizedBox(height: 2.h),
       
-          _BottomCard(
+          BottomCard(
             onSignIn: _handleSignIn,
             onGuest: () async{
               ref.read(authProvider.notifier).continueAsGuest();
               ref.read(navigationProvider).goToLoading();
-
             },
             isSigningIn: _isSigningIn,
+        
           ),
         ],
       ),
@@ -211,12 +211,13 @@ class _Dots extends StatelessWidget {
 
 // ─── Bottom card ─────────────────────────────────────────────────────────────
 
-class _BottomCard extends StatelessWidget {
+class BottomCard extends StatelessWidget {
   final VoidCallback onSignIn;
   final VoidCallback onGuest;
   final bool isSigningIn;
 
-  const _BottomCard({required this.onSignIn, required this.onGuest, this.isSigningIn = false,});
+
+  const BottomCard({super.key, required this.onSignIn, required this.onGuest, this.isSigningIn = false, });
 
   @override
   Widget build(BuildContext context) {
@@ -235,61 +236,79 @@ class _BottomCard extends StatelessWidget {
           ],
         ),
         padding: const EdgeInsets.all(10),
-        child: Column(
-          children: [
-            AuthButton(
-              text: 'Continue with Facebook',
-              icon: Icons.facebook_rounded,
-              color: const Color(0xff4867AA),
-              textColor: Colors.white,
-              iconColor: Colors.white,
-              onTap: (){},
-               isloading: false,
-              
-            ),
-      
-            SizedBox(height: 1.5.h),
-      
-            AuthButton(
-              text: 'Continue with Gmail',
-              imageIcon: 'assets/images/google_logo.png',
-              color: Colors.white,
-              textColor: const Color(0xff444444),
-              iconColor: const Color(0xff444444),
-              onTap: onSignIn, 
-              isloading: isSigningIn,
-            ),
-      
-            const SizedBox(height: 14),
-      
-            GestureDetector(
-              onTap: onGuest,
-              child: const Text(
-                'Use Meet without an account',
-                style: TextStyle(
-                  color: MeetColors.primary,
-                  fontSize: 14.5,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-      
-            SizedBox(height: 3.h,),
-      
-            const Text(
-              'By continuing, you agree to our Terms of Service and Privacy Policy.',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 12.5, color: MeetColors.light),
-            )
-                .animate()
-                .fadeIn(delay: 180.ms, duration: 400.ms)
-                .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
-          ],
-        ),
+        child: AuthButtonPack(onSignIn: onSignIn, isSigningIn: isSigningIn, onGuest: onGuest),
       )
           .animate()
           .fadeIn(delay: 180.ms, duration: 400.ms)
           .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
+    );
+  }
+}
+
+class AuthButtonPack extends StatelessWidget {
+  const AuthButtonPack({
+    super.key,
+    required this.onSignIn,
+    required this.isSigningIn,
+    required this.onGuest,
+  });
+
+  final VoidCallback onSignIn;
+  final bool isSigningIn;
+  final VoidCallback onGuest;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AuthButton(
+          text: 'Continue with Facebook',
+          icon: Icons.facebook_rounded,
+          color: const Color(0xff4867AA),
+          textColor: Colors.white,
+          iconColor: Colors.white,
+          onTap: (){},
+           isloading: false,
+          
+        ),
+          
+        SizedBox(height: 1.5.h),
+          
+        AuthButton(
+          text: 'Continue with Gmail',
+          imageIcon: 'assets/images/google_logo.png',
+          color: Colors.white,
+          textColor: const Color(0xff444444),
+          iconColor: const Color(0xff444444),
+          onTap: onSignIn, 
+          isloading: isSigningIn,
+        ),
+          
+        const SizedBox(height: 14),
+          
+        GestureDetector(
+          onTap: onGuest,
+          child: const Text(
+            'Use Meet without an account',
+            style: TextStyle(
+              color: MeetColors.primary,
+              fontSize: 14.5,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+          
+        SizedBox(height: 3.h,),
+          
+         Text(
+        'By continuing, you agree to our Terms of Service and Privacy Policy.',
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12.5, color: MeetColors.light),
+        )
+            .animate()
+            .fadeIn(delay: 180.ms, duration: 400.ms)
+            .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
+      ],
     );
   }
 }

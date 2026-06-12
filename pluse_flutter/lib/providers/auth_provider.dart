@@ -8,46 +8,53 @@ import 'package:pluse_flutter/providers/navigation_controller.dart';
 final authProvider =
     StateNotifierProvider<AuthNotifier, AuthStatus>((ref) => AuthNotifier());
 
-    final navigationProvider = Provider<NavigationController>((ref) {
-  return NavigationController(ref);});
-
+final navigationProvider = Provider<NavigationController>((ref) {
+  return NavigationController(ref);
+});
 
 class AuthNotifier extends StateNotifier<AuthStatus> {
   AuthNotifier() : super(AuthStatus.unauthenticated);
 
-  /// Simulates a 4-second network call — swap body with real auth later
-Future<void> signInWithGoogle() async {
-  state = AuthStatus.authenticating;
-  try {
-    final signIn = GoogleSignIn.instance;
-    await signIn.initialize(
-      serverClientId: '1017604801521-ggo26v7q95e8bm2jh55mtoknefpgf8e1.apps.googleusercontent.com',
-      
-    );
-    final googleUser = await signIn.authenticate();
-    final idToken = googleUser.authentication.idToken;
-    if (idToken == null) throw Exception('No ID token received');
-    final authorization = await googleUser.authorizationClient
-        .authorizationForScopes(['email', 'profile']);
-    await client.googleIdp.login(
-      idToken: idToken,
-      accessToken: authorization?.accessToken,
-    );
-    state = AuthStatus.authenticated;
-    // ← no navigation here, let the caller handle it
-  } catch (e) {
-    state = AuthStatus.unauthenticated;
-    rethrow;
-  }
-}
-  void continueAsGuest(
-    
-  ) {state = AuthStatus.unauthenticated;
-      
+  Future<void> signInWithGoogle() async {
+    state = AuthStatus.authenticating;
+    try {
+      // Initialize with the WEB client ID as serverClientId.
+      // This must match the client_id in your passwords.yaml googleClientSecret.
+      await GoogleSignIn.instance.initialize(
+        serverClientId:
+            '1017604801521-ggo26v7q95e8bm2jh55mtoknefpgf8e1.apps.googleusercontent.com',
+      );
+
+      final googleUser = await GoogleSignIn.instance.authenticate();
+
+      final idToken = googleUser.authentication.idToken;
+      if (idToken == null) throw Exception('No ID token received from Google');
+
+      // Request authorization to get access token
+      final authorization = await googleUser.authorizationClient
+          .authorizationForScopes(['email', 'profile']);
+
+      // Send to your Serverpod server
+      await client.googleIdp.login(
+        idToken: idToken,
+        accessToken: authorization?.accessToken,
+      );
+
+      state = AuthStatus.authenticated;
+    } on Exception {
+      state = AuthStatus.unauthenticated;
+      rethrow;
+    }
   }
 
- Future<void> signOut() async {
-  await GoogleSignIn.instance.signOut();
-  state = AuthStatus.unauthenticated;
-}
+  void continueAsGuest() {
+    state = AuthStatus.unauthenticated;
+  }
+
+  Future<void> signOut() async {
+    try {
+      await GoogleSignIn.instance.signOut();
+    } catch (_) {}
+    state = AuthStatus.unauthenticated;
+  }
 }

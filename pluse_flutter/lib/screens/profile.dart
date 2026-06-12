@@ -1,10 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:lottie/lottie.dart';
-import 'package:pluse_flutter/core/enums.dart';
-import 'package:pluse_flutter/core/theme/app_colors.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart' hide navigationProvider;
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
@@ -16,20 +13,24 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final auth = ref.watch(authProvider);
-    return auth.isAuthenticated
-        ? const _AuthenticatedProfile()
-        : const _UnauthenticatedProfile();
+
+       return Profile();
+  
   }
 }
 
 // ─── Authenticated view ───────────────────────────────────────────────────────
 
-class _AuthenticatedProfile extends ConsumerWidget {
-  const _AuthenticatedProfile();
+class Profile extends ConsumerStatefulWidget {
+  const Profile({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<Profile> createState() => _ProfileState();
+}
+
+class _ProfileState extends ConsumerState<Profile> {
+  @override
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
@@ -189,72 +190,7 @@ class _AuthenticatedProfile extends ConsumerWidget {
 
 // ─── Unauthenticated / sign-in view ──────────────────────────────────────────
 
-class _UnauthenticatedProfile extends ConsumerWidget {
-  const _UnauthenticatedProfile();
 
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return Padding(
-      padding: const EdgeInsets.all(10),
-      child: Column(
-        children: [
-          Align(
-            alignment: Alignment.centerLeft,
-            child: GestureDetector(
-              onTap: () => ref.read(navigationProvider).goToHome(),
-              child: const Icon(
-                Icons.arrow_back_ios_outlined,
-                size: 26,
-                color: Color(0xff111111),
-              ),
-            ),
-          ),
-    
-          const Spacer(),
-    
-          Transform.scale(
-            scale: 2.5,
-            child: Lottie.asset(
-              'assets/images/Video call chatting animation.json',
-              width: 180,
-              height: 180,
-              fit: BoxFit.contain,
-            ),
-          ),
-    
-          SizedBox(height: 7.h),
-    
-          Text(
-            'Sign in',
-            style: GoogleFonts.spaceGrotesk(
-              fontSize: 35.sp,
-              fontWeight: FontWeight.bold,
-              color: Colors.black,
-              letterSpacing: -1,
-            ),
-          ),
-    
-          SizedBox(height: 3.h),
-    
-          
-    
-          SizedBox(height: 2.h),
-    
-          const Text(
-            'By continuing, you agree to our Terms of Service and Privacy Policy.',
-            textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 12.5, color: MeetColors.light),
-          )
-              .animate()
-              .fadeIn(delay: 180.ms, duration: 400.ms)
-              .slideY(begin: 0.06, end: 0, delay: 180.ms, duration: 400.ms),
-    
-          const Spacer(flex: 2),
-        ],
-      ),
-    );
-  }
-}
 
 // ─── Shared sub-widgets ───────────────────────────────────────────────────────
 
@@ -368,82 +304,3 @@ class _SettingsTile extends StatelessWidget {
   }
 }
 
-class AuthButton extends StatelessWidget {
-  final String text;
-  final IconData? icon;
-  final String? imageIcon;
-  final Color color;
-  final Color textColor;
-  final Color iconColor;
-  final VoidCallback onTap;
-  final bool isloading;
-
-   const AuthButton( {super.key, 
-    required this.text,
-    required this.color,
-    required this.textColor,
-    required this.iconColor,
-    required this.onTap,
-    required this.isloading,
-    this.icon,
-    this.imageIcon, 
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 25),
-      child: GestureDetector(
-        onTap: isloading ? null : onTap, 
-        child: Container(
-          height: 60,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.06),
-                blurRadius: 14,
-                offset: const Offset(0, 8),
-              ),
-            ],
-          ),
-          child: Stack(
-            alignment: Alignment.center,
-            children: [
-              Positioned(
-                left: 25,
-                child: imageIcon != null
-                    ? Image.asset(imageIcon!, width: 25, height: 25)
-                    : Icon(icon, size: 30, color: iconColor),
-              ),
-
-              if (isloading)
-                Positioned(
-                  right: 25,
-                  child: SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 3.5,
-                      valueColor: AlwaysStoppedAnimation<Color>(iconColor),
-                    ),
-                  ),
-                ),
-
-              Text(
-                isloading ? 'Signing in...' : text,
-                style: GoogleFonts.spaceGrotesk(
-                  fontSize: 16.sp,
-                  fontWeight: FontWeight.bold,
-                  color: textColor,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}

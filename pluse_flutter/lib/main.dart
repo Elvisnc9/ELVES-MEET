@@ -9,7 +9,7 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
-final client = Client('http://192.168.147.254:8080/')
+final client = Client('http://192.168.101.254:8080/')
   ..authSessionManager = FlutterAuthSessionManager();
 
 void main() async {
@@ -20,7 +20,6 @@ void main() async {
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
   );
 client.auth.initialize();
-  client.auth.initializeGoogleSignIn();
 
 
 
