@@ -54,10 +54,13 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
                   if (!mounted) return;
 ref.read(navigationProvider).goToHome();         
        },
-                child: const Icon(
-                  Icons.arrow_back_rounded,
-                  size: 28,
-                  color: Color(0xff202124),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
+                  child: const Icon(
+                    Icons.arrow_back_rounded,
+                    size: 28,
+                    color: Color(0xff202124),
+                  ),
                 ),
               ),
 
@@ -68,7 +71,7 @@ ref.read(navigationProvider).goToHome();
                   'Join with a code',
                   style: GoogleFonts.spaceGrotesk(
                     fontSize: 24.sp,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w800,
                     color: const Color(0xff202124),
                     letterSpacing: -1.5,
                   ),
@@ -102,14 +105,14 @@ ref.read(navigationProvider).goToHome();
 
           SizedBox(height: 4.h),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
               'Enter the code provided by the meeting organiser',
-              textAlign: TextAlign.start,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 14.sp,
             fontWeight: FontWeight.w500,
-                color: Colors.black12.withOpacity(0.3),
+                color: Colors.black,
               ),
             )
           ),
@@ -120,8 +123,8 @@ ref.read(navigationProvider).goToHome();
             child: Container(
               height: 50,
               decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(38),
+                 color: Colors.grey.withOpacity(0.2),
+                borderRadius: BorderRadius.circular(20),
               ),
               child: TextField(
                 controller: codeCtrl,
@@ -135,14 +138,15 @@ ref.read(navigationProvider).goToHome();
                 cursorHeight: 20,
                 style: GoogleFonts.spaceGrotesk(
                   fontSize: 19,
-                  color: const Color(0xff202124),
+                  color:  Colors.black,
+                  
                 ),
                 decoration: InputDecoration(
                 
                   hintText: 'Example: abc-mnop-xyz',
                   hintStyle: GoogleFonts.spaceGrotesk(
                     fontSize: 16,
-                    color: const Color(0xffB7B8C2),
+                    color: Colors.black,
                   ),
                   border: InputBorder.none,
                   contentPadding: const EdgeInsets.symmetric(

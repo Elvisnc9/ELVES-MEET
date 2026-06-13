@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:pluse_client/pluse_client.dart';
 
 import 'package:pluse_flutter/app/appshell.dart';
@@ -15,7 +16,7 @@ final client = Client('http://192.168.101.254:8080/')
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await client.authSessionManager.initialize();
-  
+
 
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.transparent),
@@ -40,7 +41,7 @@ class MyApp extends ConsumerWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'VIDEO CALL APP',
-       theme: ThemeData(fontFamily: 'GoogleSans', useMaterial3: true),
+       theme: ThemeData(fontFamily: GoogleFonts.spaceGrotesk().fontFamily, useMaterial3: true),
       home: AppShell(),
     );
   }

@@ -13,25 +13,9 @@ class ProfileScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-
-       return Profile();
-  
-  }
-}
-
-// ─── Authenticated view ───────────────────────────────────────────────────────
-
-class Profile extends ConsumerStatefulWidget {
-  const Profile({super.key});
-
-  @override
-  ConsumerState<Profile> createState() => _ProfileState();
-}
-
-class _ProfileState extends ConsumerState<Profile> {
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
+    final nav = ref.watch(navigationProvider);
+    
+         return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,15 +162,21 @@ class _ProfileState extends ConsumerState<Profile> {
               title: 'Log Out',
               titleColor: const Color(0xffFF4D4D),
               arrowColor: const Color(0xffFF4D4D),
-              onTap: () => ref.read(authProvider.notifier).signOut(),
+              onTap: () {
+                ref.read(authProvider.notifier).signOut();
+                nav.goToOnboarding();
+              },
               showDivider: false,
             ),
           ]),
         ],
       ),
     );
+  
   }
 }
+
+// ─── Authenticated view ───────────────────────────────────────────────────────
 
 // ─── Unauthenticated / sign-in view ──────────────────────────────────────────
 

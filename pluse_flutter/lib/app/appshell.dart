@@ -1,5 +1,8 @@
+// ignore_for_file: invalid_use_of_protected_member, invalid_use_of_visible_for_testing_member
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_theme.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
 import 'package:pluse_flutter/screens/codeSearch.dart';
@@ -24,8 +27,9 @@ class _AppShellState extends ConsumerState<AppShell> {
   void initState() {
     super.initState();
      WidgetsBinding.instance.addPostFrameCallback((_) {
-    final isLoggedIn = ref.read(isLoggedInProvider);
+   final isLoggedIn = ref.read(isLoggedInProvider);
     if (isLoggedIn) {
+      ref.read(authProvider.notifier).state = AuthStatus.authenticated;
       ref.read(rootScreenProvider.notifier).state = RootScreen.home;
     } else {
       ref.read(rootScreenProvider.notifier).state = RootScreen.onboarding;
@@ -44,21 +48,10 @@ class _AppShellState extends ConsumerState<AppShell> {
 
             /// ─── ROOT SCREENS ─────────────────────────────
 AnimatedSwitcher(
-  duration: const Duration(milliseconds: 200),
-  transitionBuilder: (child, animation) {
-    final tween = Tween(
-      begin: const Offset(-1.0, 0),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: animation,
-      curve: Curves.easeInOut,
-    ));
-    return SlideTransition(position: tween, child: child);
-  },
+  duration: const Duration(milliseconds: 50),
   child: KeyedSubtree(
     key: ValueKey(rootScreen),
     child: switch (rootScreen) {
-      
       RootScreen.onboarding => const OnboardingScreen(),
       RootScreen.loading    => const LoadingScreen(),
       RootScreen.home       => const HomeScreen(),

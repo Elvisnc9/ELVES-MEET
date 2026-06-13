@@ -38,13 +38,13 @@ class TopBar extends StatelessWidget {
           Expanded(
             child: InkWell(
               onTap: onCodeTap,
-              borderRadius: BorderRadius.circular(32),
+              borderRadius: BorderRadius.circular(20),
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
-                height: 48,
+                height: 50,
                 decoration: BoxDecoration(
-                  color: Colors.white54,
-                  borderRadius: BorderRadius.circular(32),
+                  color: Colors.grey.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 child: Align(
                   alignment: Alignment.centerLeft,
