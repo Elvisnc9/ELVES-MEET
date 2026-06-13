@@ -3,8 +3,9 @@ import 'package:flutter_animate/flutter_animate.dart';
 
 class FabStack extends StatelessWidget {
   final VoidCallback joinTap;
+  final VoidCallback createTap;
 
-  const FabStack({super.key, required this.joinTap});
+  const FabStack({super.key, required this.joinTap, required this.createTap});
 
   @override
   Widget build(BuildContext context) {
@@ -14,8 +15,15 @@ class FabStack extends StatelessWidget {
       children: [
         WideFab(
           color: Colors.black,
-          label: 'Join',
+          label: 'Create Room ',
           icon: Icons.video_call_outlined,
+          onTap: createTap,
+        ),
+
+        WideFab(
+          color: Colors.grey.shade800,
+          label: 'Join Room ',
+          icon: Icons.add,
           onTap: joinTap,
         ),
       ],
@@ -42,36 +50,39 @@ class WideFab extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        height: 56,
-        padding: const EdgeInsets.symmetric(horizontal: 22),
-        decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(18),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.08),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: Colors.white, size: 24),
-            const SizedBox(width: 8),
-            Text(
-              label,
-              style: const TextStyle(
-                fontSize: 15,
-                fontWeight: FontWeight.w600,
-                color: Colors.white,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          height: 56,
+          padding: const EdgeInsets.symmetric(horizontal: 22,),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 12,
+                offset: const Offset(0, 4),
               ),
-            ),
-          ],
+            ],
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, color: Colors.white, size: 24),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
