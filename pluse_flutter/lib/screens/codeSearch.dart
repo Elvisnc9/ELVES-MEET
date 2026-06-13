@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
+import 'package:pluse_flutter/screens/profile.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
 class CodeSearchScreen extends ConsumerStatefulWidget {
@@ -45,24 +46,15 @@ class _CodeSearchScreenState extends ConsumerState<CodeSearchScreen> {
 
           Row(
             children: [
-              GestureDetector(
-                onTap: () async {
-                  FocusManager.instance.primaryFocus?.unfocus();
+           
+              CircleIcon(icon: Icons.arrow_back_rounded, onTap: ()async{
+                                  FocusManager.instance.primaryFocus?.unfocus();
+                 
 
                   await Future.delayed(const Duration(milliseconds: 120));
-
                   if (!mounted) return;
-ref.read(navigationProvider).goToHome();         
-       },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12.0),
-                  child: const Icon(
-                    Icons.arrow_back_rounded,
-                    size: 28,
-                    color: Color(0xff202124),
-                  ),
-                ),
-              ),
+ref.read(navigationProvider).goToHome();   
+              }),
 
               const SizedBox(width: 18),
 

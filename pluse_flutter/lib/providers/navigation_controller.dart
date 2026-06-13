@@ -15,6 +15,7 @@ enum RootScreen {
   home,
   profile,
   codeSearch,
+  call,
 }
 
 final rootScreenProvider =
@@ -61,6 +62,12 @@ final drawerOpenProvider = StateProvider<bool>((ref) => false);
     ref
         .read(rootScreenProvider.notifier)
         .state = RootScreen.profile;
+  }
+
+  void callScreen(String meetingId) {
+    ref
+        .read(rootScreenProvider.notifier)
+        .state = RootScreen.call;
   }
 
   void goToLoading() {

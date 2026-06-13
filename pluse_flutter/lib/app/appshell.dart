@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_theme.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
+import 'package:pluse_flutter/screens/callScreen.dart';
 import 'package:pluse_flutter/screens/codeSearch.dart';
 import 'package:pluse_flutter/screens/homeScreen.dart';
 import 'package:pluse_flutter/screens/onboardiing.dart';
@@ -55,6 +56,7 @@ AnimatedSwitcher(
       RootScreen.onboarding => const OnboardingScreen(),
       RootScreen.loading    => const LoadingScreen(),
       RootScreen.home       => const HomeScreen(),
+      RootScreen.call => const CallScreen(),
       RootScreen.codeSearch => const CodeSearchScreen(),
       RootScreen.profile    => const ProfileScreen(),
     },

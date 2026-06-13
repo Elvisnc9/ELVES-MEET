@@ -79,6 +79,6 @@ class TopBar extends StatelessWidget {
           ),
         ],
       ),
-    ).animate().fadeIn(duration: 350.ms);
+    );
   }
 }

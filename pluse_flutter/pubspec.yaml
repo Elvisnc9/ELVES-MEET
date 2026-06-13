@@ -41,6 +41,7 @@ dependencies:
   lottie:
   google_sign_in:
   permission_handler:
+  agora_rtc_engine:
   flutter_secure_storage: 
 
 flutter_native_splash:

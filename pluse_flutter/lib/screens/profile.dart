@@ -25,8 +25,8 @@ class ProfileScreen extends ConsumerWidget {
           // Top bar
           Row(
             children: [
-              _CircleIcon(
-                icon: Icons.arrow_back_ios_new_rounded,
+              CircleIcon(
+                icon: Icons.arrow_back_rounded,
                 onTap: () => ref.read(navigationProvider).goToHome()
               ),
               const Spacer(),
@@ -184,23 +184,26 @@ class ProfileScreen extends ConsumerWidget {
 
 // ─── Shared sub-widgets ───────────────────────────────────────────────────────
 
-class _CircleIcon extends StatelessWidget {
+class CircleIcon extends StatelessWidget {
   final IconData icon;
   final VoidCallback onTap;
-  const _CircleIcon({required this.icon, required this.onTap});
+  const CircleIcon({super.key, required this.icon, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 38,
-        height: 38,
-        decoration: const BoxDecoration(
-          color: Color(0xffF1F1E6),
-          shape: BoxShape.circle,
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 38,
+          height: 38,
+          decoration: const BoxDecoration(
+            color: Color(0xffF1F1E6),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 28, color: const Color(0xff111111)),
         ),
-        child: Icon(icon, size: 17, color: const Color(0xff111111)),
       ),
     );
   }
