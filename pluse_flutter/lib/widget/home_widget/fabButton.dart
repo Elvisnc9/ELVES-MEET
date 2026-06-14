@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 class FabStack extends StatelessWidget {
   final VoidCallback joinTap;
@@ -27,10 +26,7 @@ class FabStack extends StatelessWidget {
           onTap: joinTap,
         ),
       ],
-    )
-        .animate()
-        .fadeIn(delay: 300.ms, duration: 400.ms)
-        .slideY(begin: 0.1, end: 0, delay: 300.ms, duration: 400.ms);
+    );
   }
 }
 

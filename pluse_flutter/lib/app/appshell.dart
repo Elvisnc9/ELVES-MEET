@@ -7,6 +7,7 @@ import 'package:pluse_flutter/core/theme/app_theme.dart';
 import 'package:pluse_flutter/providers/auth_provider.dart';
 import 'package:pluse_flutter/screens/callScreen.dart';
 import 'package:pluse_flutter/screens/codeSearch.dart';
+import 'package:pluse_flutter/screens/createroom.dart';
 import 'package:pluse_flutter/screens/homeScreen.dart';
 import 'package:pluse_flutter/screens/onboardiing.dart';
 import 'package:pluse_flutter/screens/profile.dart';
@@ -47,6 +48,7 @@ class _AppShellState extends ConsumerState<AppShell> {
         child: Stack(
           children: [
 
+           
             /// ─── ROOT SCREENS ─────────────────────────────
 AnimatedSwitcher(
   duration: const Duration(milliseconds: 50),
@@ -63,7 +65,7 @@ AnimatedSwitcher(
   ),
 ),
             /// ─── OVERLAYS ─────────────────────────────────
-
+ const CreateRoomPanel(),
           
           ],
         ),

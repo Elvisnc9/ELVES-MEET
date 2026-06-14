@@ -71,7 +71,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           right: 5.w,
           child: FabStack(
             joinTap: () => ref.read(navigationProvider).openCodeSearch(),
-            createTap: () => ref.read(createRoomPanelProvider.notifier).state = true,
+            createTap: () async {
+  ref.read(createRoomLoadingProvider.notifier).state = true; // set loader first
+  
+  await Future.delayed(Duration.zero); // let it settle one frame
+  
+  ref.read(createRoomPanelProvider.notifier).state = true; // then open panel
+
+  await Future.delayed(const Duration(seconds: 3));
+
+  ref.read(createRoomLoadingProvider.notifier).state = false;
+            }
           ),
         ),
         const DrawerLayer(),
