@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:pluse_flutter/providers/call_provider.dart';
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:pluse_flutter/screens/profile.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
@@ -71,7 +72,15 @@ ref.read(navigationProvider).goToHome();
               ),
 
               GestureDetector(
-                onTap: canJoin ? () {} : null,
+                onTap: canJoin ?  () async {
+        final channelName = codeCtrl.text.trim();
+        try {
+          await ref.read(callStateProvider.notifier).joinChannel(channelName);
+          ref.read(navigationProvider).callScreen(channelName);
+        } catch (e) {
+          // show error snackbar
+        }
+      } : null,
                 child: Container(
                   width: 10.h,
                   height: 40,

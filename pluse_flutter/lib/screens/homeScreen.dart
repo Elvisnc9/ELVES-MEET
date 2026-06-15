@@ -119,7 +119,7 @@ class Body extends StatelessWidget {
               10,
               (i) => Container(
                 margin: EdgeInsets.only(bottom: 1.5.h),
-                height: 10.h,
+                height: 12.h,
                 decoration: BoxDecoration(
                   color: Colors.grey.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(18),

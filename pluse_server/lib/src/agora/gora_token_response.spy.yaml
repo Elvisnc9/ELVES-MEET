@@ -1,0 +1,6 @@
+class: AgoraTokenResponse
+fields:
+  appId: String
+  token: String
+  uid: int
+  channelName: String

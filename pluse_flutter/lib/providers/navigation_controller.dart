@@ -64,11 +64,9 @@ final drawerOpenProvider = StateProvider<bool>((ref) => false);
         .state = RootScreen.profile;
   }
 
-  void callScreen(String meetingId) {
-    ref
-        .read(rootScreenProvider.notifier)
-        .state = RootScreen.call;
-  }
+void callScreen(String meetingId) {
+  ref.read(rootScreenProvider.notifier).state = RootScreen.call;
+}
 
   void goToLoading() {
     ref

@@ -1,126 +1,157 @@
-// import 'package:agora_rtc_engine/agora_rtc_engine.dart';
-// import 'package:flutter_riverpod/legacy.dart';
-// import 'package:pluse_flutter/main.dart';
+import 'package:agora_rtc_engine/agora_rtc_engine.dart';
+import 'package:flutter_riverpod/legacy.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:pluse_flutter/main.dart';
 
-// final callStateProvider = StateNotifierProvider<CallStateNotifier, CallState>((ref) {
-//   return CallStateNotifier();
-// });
+final callStateProvider =
+    StateNotifierProvider<CallStateNotifier, CallState>((ref) {
+  return CallStateNotifier();
+});
 
-// class CallState {
-//   final bool isMuted;
-//   final bool isCameraOn;
-//   final bool isSpeakerOn;
-//   final bool isScreenSharing;
-//   final Duration callDuration;
-//   final String? activeMeetingId;
-//   final RtcEngine? engine;
-//   final int? localUid;
-//   final Set<int> remoteUids;
+class CallState {
+  final bool isMuted;
+  final bool isCameraOn;
+  final bool isSpeakerOn;
+  final String? activeMeetingId;
+  final RtcEngine? engine;
+  final int? localUid;
+  final Set<int> remoteUids;
+  final bool isJoining;
 
-//   CallState({
-//     this.isMuted = false,
-//     this.isCameraOn = true,
-//     this.isSpeakerOn = true,
-//     this.isScreenSharing = false,
-//     this.callDuration = Duration.zero,
-//     this.activeMeetingId,
-//     this.engine,
-//     this.localUid,
-//     this.remoteUids = const {},
-//   });
+  CallState({
+    this.isMuted = false,
+    this.isCameraOn = true,
+    this.isSpeakerOn = true,
+    this.activeMeetingId,
+    this.engine,
+    this.localUid,
+    this.remoteUids = const {},
+    this.isJoining = false,
+  });
 
-//   CallState copyWith({
-//     bool? isMuted,
-//     bool? isCameraOn,
-//     bool? isSpeakerOn,
-//     bool? isScreenSharing,
-//     Duration? callDuration,
-//     String? activeMeetingId,
-//     RtcEngine? engine,
-//     int? localUid,
-//     Set<int>? remoteUids,
-//   }) {
-//     return CallState(
-//       isMuted: isMuted ?? this.isMuted,
-//       isCameraOn: isCameraOn ?? this.isCameraOn,
-//       isSpeakerOn: isSpeakerOn ?? this.isSpeakerOn,
-//       isScreenSharing: isScreenSharing ?? this.isScreenSharing,
-//       callDuration: callDuration ?? this.callDuration,
-//       activeMeetingId: activeMeetingId ?? this.activeMeetingId,
-//       engine: engine ?? this.engine,
-//       localUid: localUid ?? this.localUid,
-//       remoteUids: remoteUids ?? this.remoteUids,
-//     );
-//   }
-// }
+  CallState copyWith({
+    bool? isMuted,
+    bool? isCameraOn,
+    bool? isSpeakerOn,
+    String? activeMeetingId,
+    RtcEngine? engine,
+    int? localUid,
+    Set<int>? remoteUids,
+    bool? isJoining,
+  }) {
+    return CallState(
+      isMuted: isMuted ?? this.isMuted,
+      isCameraOn: isCameraOn ?? this.isCameraOn,
+      isSpeakerOn: isSpeakerOn ?? this.isSpeakerOn,
+      activeMeetingId: activeMeetingId ?? this.activeMeetingId,
+      engine: engine ?? this.engine,
+      localUid: localUid ?? this.localUid,
+      remoteUids: remoteUids ?? this.remoteUids,
+      isJoining: isJoining ?? this.isJoining,
+    );
+  }
+}
 
-// class CallStateNotifier extends StateNotifier<CallState> {
-//   CallStateNotifier() : super(CallState());
+class CallStateNotifier extends StateNotifier<CallState> {
+  CallStateNotifier() : super(CallState());
 
-//   Future<void> joinChannel(String channelName) async {
-//     // 1. Get token from server
-//     final tokenResponse = await client.agora.getToken(channelName);
+  Future<bool> requestPermissions() async {
+    final statuses = await [
+      Permission.camera,
+      Permission.microphone,
+    ].request();
+    return statuses.values.every((s) => s.isGranted);
+  }
 
-//     // 2. Create + initialize engine
-//     final engine = createAgoraRtcEngine();
-//     await engine.initialize(RtcEngineContext(appId: tokenResponse.appId));
+  Future<void> joinChannel(String channelName) async {
+    state = state.copyWith(isJoining: true);
 
-//     engine.registerEventHandler(
-//       RtcEngineEventHandler(
-//         onJoinChannelSuccess: (connection, elapsed) {
-//           state = state.copyWith(localUid: connection.localUid);
-//         },
-//         onUserJoined: (connection, remoteUid, elapsed) {
-//           state = state.copyWith(remoteUids: {...state.remoteUids, remoteUid});
-//         },
-//         onUserOffline: (connection, remoteUid, reason) {
-//           final updated = {...state.remoteUids}..remove(remoteUid);
-//           state = state.copyWith(remoteUids: updated);
-//         },
-//       ),
-//     );
+    try {
+      // 1. Request permissions
+      final granted = await requestPermissions();
+      if (!granted) {
+        state = state.copyWith(isJoining: false);
+        throw Exception('Camera/microphone permissions denied');
+      }
 
-//     await engine.enableVideo();
-//     await engine.startPreview();
+      // 2. Get token from your Serverpod server
+      final tokenResponse = await client.agora.getToken(channelName);
 
-//     await engine.joinChannel(
-//       token: tokenResponse.token,
-//       channelId: channelName,
-//       uid: tokenResponse.uid,
-//       options: const ChannelMediaOptions(
-//         clientRoleType: ClientRoleType.clientRoleBroadcaster,
-//         channelProfile: ChannelProfileType.channelProfileCommunication,
-//       ),
-//     );
+      // 3. Create + initialize Agora engine
+      final engine = createAgoraRtcEngine();
+      await engine.initialize(RtcEngineContext(appId: tokenResponse.appId));
 
-//     state = state.copyWith(
-//       engine: engine,
-//       activeMeetingId: channelName,
-//       localUid: tokenResponse.uid,
-//     );
-//   }
+      // 4. Register event handlers
+      engine.registerEventHandler(
+        RtcEngineEventHandler(
+          onJoinChannelSuccess: (connection, elapsed) {
+            state = state.copyWith(
+              localUid: connection.localUid,
+              isJoining: false,
+            );
+          },
+          onUserJoined: (connection, remoteUid, elapsed) {
+            state = state.copyWith(
+              remoteUids: {...state.remoteUids, remoteUid},
+            );
+          },
+          onUserOffline: (connection, remoteUid, reason) {
+            final updated = {...state.remoteUids}..remove(remoteUid);
+            state = state.copyWith(remoteUids: updated);
+          },
+          onError: (err, msg) {
+            state = state.copyWith(isJoining: false);
+          },
+        ),
+      );
 
-//   Future<void> toggleMute() async {
-//     final newMuted = !state.isMuted;
-//     await state.engine?.muteLocalAudioStream(newMuted);
-//     state = state.copyWith(isMuted: newMuted);
-//   }
+      // 5. Enable video
+      await engine.enableVideo();
+      await engine.startPreview();
 
-//   Future<void> toggleCamera() async {
-//     final newCameraOn = !state.isCameraOn;
-//     await state.engine?.muteLocalVideoStream(!newCameraOn);
-//     state = state.copyWith(isCameraOn: newCameraOn);
-//   }
+      // 6. Join the channel
+      await engine.joinChannel(
+        token: tokenResponse.token,
+        channelId: tokenResponse.channelName,
+        uid: tokenResponse.uid,
+        options: const ChannelMediaOptions(
+          clientRoleType: ClientRoleType.clientRoleBroadcaster,
+          channelProfile: ChannelProfileType.channelProfileCommunication,
+        ),
+      );
 
-//   Future<void> toggleSpeaker() async {
-//     final newSpeakerOn = !state.isSpeakerOn;
-//     await state.engine?.setEnableSpeakerphone(newSpeakerOn);
-//     state = state.copyWith(isSpeakerOn: newSpeakerOn);
-//   }
+      state = state.copyWith(
+        engine: engine,
+        activeMeetingId: channelName,
+        localUid: tokenResponse.uid,
+      );
+    } catch (e) {
+      state = state.copyWith(isJoining: false);
+      rethrow;
+    }
+  }
 
-//   Future<void> endCall() async {
-//     await state.engine?.leaveChannel();
-//     await state.engine?.release();
-//     state = CallState();
-//   }
-// }
+  Future<void> toggleMute() async {
+    final newMuted = !state.isMuted;
+    await state.engine?.muteLocalAudioStream(newMuted);
+    state = state.copyWith(isMuted: newMuted);
+  }
+
+  Future<void> toggleCamera() async {
+    final newCameraOn = !state.isCameraOn;
+    await state.engine?.muteLocalVideoStream(!newCameraOn);
+    state = state.copyWith(isCameraOn: newCameraOn);
+  }
+
+  Future<void> toggleSpeaker() async {
+    final newSpeakerOn = !state.isSpeakerOn;
+    await state.engine?.setEnableSpeakerphone(newSpeakerOn);
+    state = state.copyWith(isSpeakerOn: newSpeakerOn);
+  }
+
+  Future<void> endCall() async {
+    await state.engine?.leaveChannel();
+    await state.engine?.release();
+    state = CallState();
+  }
+}
