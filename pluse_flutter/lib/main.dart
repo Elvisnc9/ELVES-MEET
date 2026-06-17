@@ -10,7 +10,7 @@ import 'package:serverpod_auth_idp_flutter/serverpod_auth_idp_flutter.dart';
 
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
-final client = Client('http://10.46.201.1:8080/')
+final client = Client('http://10.165.21.254:8080/')
   ..authSessionManager = FlutterAuthSessionManager();
 
 void main() async {
@@ -40,7 +40,7 @@ class MyApp extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'VIDEO CALL APP',
+      title: 'Elves Meet',
        theme: ThemeData(fontFamily: GoogleFonts.spaceGrotesk().fontFamily, useMaterial3: true),
       home: AppShell(),
     );

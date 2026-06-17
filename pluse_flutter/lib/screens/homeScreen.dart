@@ -3,9 +3,11 @@ import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pluse_flutter/core/enums.dart';
 import 'package:pluse_flutter/core/theme/app_colors.dart';
-import 'package:pluse_flutter/providers/auth_provider.dart' hide navigationProvider;
+import 'package:pluse_flutter/providers/auth_provider.dart'
+    hide navigationProvider;
 import 'package:pluse_flutter/providers/navigation_controller.dart';
 import 'package:pluse_flutter/screens/createroom.dart';
 import 'package:pluse_flutter/widget/home_widget/FabButton.dart';
@@ -14,10 +16,7 @@ import 'package:pluse_flutter/widget/home_widget/topbar.dart';
 import 'package:pluse_flutter/widget/loader.dart';
 import 'package:the_responsive_builder/the_responsive_builder.dart';
 
-
-
 final drawerOpenProvider = StateProvider<bool>((ref) => false);
-
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -30,9 +29,40 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   final _codeCtrl = TextEditingController();
 
   @override
+  void initState() {
+    super.initState();
+    // Request camera & microphone permissions as soon as the home screen loads
+    // so the user isn't surprised when they try to join a call.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await [Permission.camera, Permission.microphone].request();
+    });
+  }
+
+  @override
   void dispose() {
     _codeCtrl.dispose();
     super.dispose();
+  }
+
+  /// Generates a channel name, stores it, fakes a "creating" delay,
+  /// then opens the panel ready for the user to copy / join.
+  Future<void> _onCreateRoom() async {
+    final channelName = generateChannelName();
+
+    // Store generated channel name BEFORE showing the panel
+    ref.read(createdChannelProvider.notifier).state = channelName;
+
+    // Show loading state inside the panel
+    ref.read(createRoomLoadingProvider.notifier).state = true;
+    ref.read(createRoomPanelProvider.notifier).state = true;
+
+    // Simulate a brief "room creation" moment (no actual server call needed
+    // since Agora creates channels on first join)
+    await Future.delayed(const Duration(milliseconds: 1200));
+
+    if (mounted) {
+      ref.read(createRoomLoadingProvider.notifier).state = false;
+    }
   }
 
   @override
@@ -54,45 +84,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 FocusScope.of(context).unfocus();
                 ref.read(navigationProvider).openCodeSearch();
               },
-              onProfileTap: () =>
-              auth.isAuthenticated?
-                  ref.read(navigationProvider).goToProfile() :
-                  ref.read(navigationProvider).goToOnboarding(),
+              onProfileTap: () => auth.isAuthenticated
+                  ? ref.read(navigationProvider).goToProfile()
+                  : ref.read(navigationProvider).goToOnboarding(),
             ),
             SizedBox(height: 3.h),
-            Expanded(
-              child: const Body()
-                  
-            ),
+            const Expanded(child: _Body()),
           ],
         ),
+
+        // ── FABs ────────────────────────────────────────────────────────
         Positioned(
           bottom: 10.h,
           right: 5.w,
           child: FabStack(
             joinTap: () => ref.read(navigationProvider).openCodeSearch(),
-            createTap: () async {
-  ref.read(createRoomLoadingProvider.notifier).state = true; // set loader first
-  
-  await Future.delayed(Duration.zero); // let it settle one frame
-  
-  ref.read(createRoomPanelProvider.notifier).state = true; // then open panel
-
-  await Future.delayed(const Duration(seconds: 3));
-
-  ref.read(createRoomLoadingProvider.notifier).state = false;
-            }
+            createTap: _onCreateRoom,
           ),
         ),
+
+        // ── Slide-up drawer ──────────────────────────────────────────────
         const DrawerLayer(),
       ],
     );
   }
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
 
-class Body extends StatelessWidget {
-  const Body({super.key});
+
+
+
+class _Body extends StatelessWidget {
+  const _Body();
 
   @override
   Widget build(BuildContext context) {
@@ -110,11 +134,9 @@ class Body extends StatelessWidget {
                 color: MeetColors.dark,
               ),
             ),
-        
-        
-        
             SizedBox(height: 1.5.h),
-        
+
+            // Placeholder skeleton cards
             ...List.generate(
               10,
               (i) => Container(
@@ -140,4 +162,3 @@ class Body extends StatelessWidget {
     );
   }
 }
-
