@@ -41,7 +41,6 @@ const _pages = [
 
 final _pageIdxProvider = StateProvider<int>((ref) => 0);
 
-
 // ─── Screen ──────────────────────────────────────────────────────────────────
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -61,38 +60,100 @@ class _State extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-Future<void> _handleSignIn() async {
-  if (_isSigningIn) return;
-  setState(() => _isSigningIn = true);
- 
-  final nav  = ref.read(navigationProvider);
-  final auth = ref.read(authProvider.notifier);
- 
-  try {
-    await auth.signInWithGoogle();
-    nav.goToLoading(); // loader auto-advances to home after 1s
-  } catch (e) {
-    setState(() => _isSigningIn = false);
-    // show snackbar
+  void _showErrorSnackbar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).clearSnackBars();
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: const Color(0xFF2C2C2A),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+        duration: const Duration(seconds: 4),
+        content: Row(
+          children: [
+            const Icon(
+              Icons.error_outline_rounded,
+              color: Color(0xFFF09595),
+              size: 20,
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sign in failed',
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xFFD3D1C7),
+                    ),
+                  ),
+                  Text(
+                    message,
+                    style: GoogleFonts.spaceGrotesk(
+                      fontSize: 12,
+                      color: const Color(0xFF888780),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
-}
+
+  Future<void> _handleSignIn() async {
+    if (_isSigningIn) return;
+    setState(() => _isSigningIn = true);
+
+    final nav = ref.read(navigationProvider);
+    final auth = ref.read(authProvider.notifier);
+
+    try {
+      await auth.signInWithGoogle();
+      nav.goToLoading();
+    } catch (e) {
+      setState(() => _isSigningIn = false);
+
+      // Parse a friendly message from the error
+      final raw = e.toString().toLowerCase();
+      String friendlyMsg;
+      if (raw.contains('cancel') || raw.contains('user_canceled')) {
+        friendlyMsg = 'Sign-in was cancelled.';
+      } else if (raw.contains('network') || raw.contains('socket')) {
+        friendlyMsg = 'No internet connection. Check your network.';
+      } else if (raw.contains('token')) {
+        friendlyMsg = 'Could not get a token from Google. Try again.';
+      } else {
+        friendlyMsg = 'Could not authenticate with Google. Try again.';
+      }
+
+      _showErrorSnackbar(friendlyMsg);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final idx = ref.watch(_pageIdxProvider);
 
     return TweenAnimationBuilder<double>(
-    tween: Tween(begin: 0.0, end: 1.0),
-    duration: const Duration(milliseconds: 520),
-    curve: Curves.easeOutCubic,
-    builder: (context, value, child) {
-      return Opacity(
-        opacity: value,
-        child: Transform.translate(
-          offset: Offset(0, 28 * (1 - value)),  // slides up 28px
-          child: child,
-        ),
-      );
-    },
+      tween: Tween(begin: 0.0, end: 1.0),
+      duration: const Duration(milliseconds: 520),
+      curve: Curves.easeOutCubic,
+      builder: (context, value, child) {
+        return Opacity(
+          opacity: value,
+          child: Transform.translate(
+            offset: Offset(0, 28 * (1 - value)),
+            child: child,
+          ),
+        );
+      },
       child: Column(
         children: [
           Expanded(
@@ -105,16 +166,14 @@ Future<void> _handleSignIn() async {
               itemBuilder: (_, i) => _Slide(page: _pages[i]),
             ),
           ),
-      
+
           SizedBox(height: 1.h),
           _Dots(current: idx, count: _pages.length),
           SizedBox(height: 2.h),
-      
+
           BottomCard(
             onSignIn: _handleSignIn,
-           
             isSigningIn: _isSigningIn,
-        
           ),
         ],
       ),
@@ -210,11 +269,13 @@ class _Dots extends StatelessWidget {
 
 class BottomCard extends StatelessWidget {
   final VoidCallback onSignIn;
- 
   final bool isSigningIn;
 
-
-  const BottomCard({super.key, required this.onSignIn, this.isSigningIn = false, });
+  const BottomCard({
+    super.key,
+    required this.onSignIn,
+    this.isSigningIn = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +295,9 @@ class BottomCard extends StatelessWidget {
         ),
         padding: const EdgeInsets.all(10),
         child: AuthButtonPack(
-          onSignIn: onSignIn, isSigningIn: isSigningIn),
+          onSignIn: onSignIn,
+          isSigningIn: isSigningIn,
+        ),
       )
           .animate()
           .fadeIn(delay: 180.ms, duration: 400.ms)
@@ -248,12 +311,10 @@ class AuthButtonPack extends StatelessWidget {
     super.key,
     required this.onSignIn,
     required this.isSigningIn,
-    
   });
 
   final VoidCallback onSignIn;
   final bool isSigningIn;
-
 
   @override
   Widget build(BuildContext context) {
@@ -265,25 +326,24 @@ class AuthButtonPack extends StatelessWidget {
           color: const Color(0xff4867AA),
           textColor: Colors.white,
           iconColor: Colors.white,
-          onTap: (){},
-           isloading: false,
-          
+          onTap: () {},
+          isloading: false,
         ),
-          
+
         SizedBox(height: 1.5.h),
-          
+
         AuthButton(
           text: 'Continue with Gmail',
           imageIcon: 'assets/images/google_logo.png',
           color: Colors.white,
           textColor: const Color(0xff444444),
           iconColor: const Color(0xff444444),
-          onTap: onSignIn, 
+          onTap: onSignIn,
           isloading: isSigningIn,
         ),
-          
+
         const SizedBox(height: 14),
-          
+
         GestureDetector(
           child: const Text(
             'Get Started With Elves Meet',
@@ -294,11 +354,11 @@ class AuthButtonPack extends StatelessWidget {
             ),
           ),
         ),
-          
-        SizedBox(height: 3.h,),
-          
-         Text(
-        'By continuing, you agree to our Terms of Service and Privacy Policy.',
+
+        SizedBox(height: 3.h),
+
+        Text(
+          'By continuing, you agree to our Terms of Service and Privacy Policy.',
           textAlign: TextAlign.center,
           style: TextStyle(fontSize: 12.5, color: MeetColors.light),
         )
