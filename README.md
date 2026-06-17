@@ -264,7 +264,7 @@ flutter run
 ## 📱 Screenshots
  
 
-| Onboarding | Chat | Drawer | Settings | Home |
+| Onboarding | Room-Link | HomeScreen | Search-Link | Call-Screen |
 |---|---|---|---|---|
 | <img src="pluse_flutter/assets/Screenshotva2.jpg" width="180"/> | <img src="pluse_flutter/assets/Screenshotva3.jpg" width="180"/> | <img src="pluse_flutter/assets/Screenshotva4.jpg" width="180"/> | <img src="pluse_flutter/assets/Screenshotva5.jpg" width="180"/> | <img src="pluse_flutter/assets/Screenshotva1.jpg" width="180"/> |
  
