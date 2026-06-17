@@ -336,7 +336,7 @@ class _RecentCallTile extends ConsumerWidget {
                   ),
                 ),
 
-                const SizedBox(width: 5.w),
+             SizedBox(width: 5.w),
 
                 // ── Avatar stack ──────────────────────────────────────────
                 SizedBox(
